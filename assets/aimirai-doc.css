@@ -1,0 +1,356 @@
+/* aimirai-doc.css — AiMirai Labs「シックでかわいい」固定ドキュメントテーマ
+ * 用途: show-html.sh が pandoc で MD → HTML 変換する際に <style> として inline 埋め込み（Issue #513）
+ * 配色: 暖色オフホワイト背景 + ダークブラウン寄りチャコール本文 + ブラウンのアクセント（固定 = ライト 1 種）
+ *       social / 投資家 / 営業向け共有は明るい方が映えるため、ダークモードは持たない（CEO 確定 session 44）
+ */
+
+/* ========== カラートークン ========== */
+:root {
+  color-scheme: light;
+
+  --bg:            #faf7f2;  /* 暖色オフホワイト（背景）*/
+  --bg-soft:       #f2ebde;  /* クリーム（コード/カード/TOC 背景）*/
+  --bg-inset:      #eadfca;  /* やや濃いクリーム（テーブル縞 / インラインコード）*/
+  --fg:            #3a322d;  /* ダークブラウン寄りチャコール（本文）*/
+  --fg-soft:       #6c5f54;  /* 控えめ */
+  --fg-faint:      #94867a;  /* さらに薄い（補足・脚注）*/
+  --accent:        #8b5e34;  /* ブラウン（リンク・見出し罫・強調）*/
+  --accent-strong: #6e4a28;  /* ブラウン濃（ホバー・h3）*/
+  --accent-soft:   #d9bd96;  /* ブラウン淡（罫・装飾）*/
+  --border:        #e3d8c5;  /* 罫線 */
+  --shadow:        rgba(58, 50, 45, 0.10);
+  --selection:     #e8d3b0;
+
+  --radius-sm: 7px;
+  --radius:    11px;
+  --radius-lg: 16px;
+  --content-width: 50rem;     /* ≒ 800px */
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, "Roboto Mono", "Noto Sans Mono", monospace;
+}
+
+/* ========== ベース ========== */
+* { box-sizing: border-box; }
+html {
+  scroll-behavior: smooth;
+  background: var(--bg);
+  color: var(--fg);
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-size: 16.5px;
+  line-height: 1.78;
+  letter-spacing: 0.005em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+::selection { background: var(--selection); }
+
+.page {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 2.6rem 1.5rem 4rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+@media (min-width: 60rem) {
+  .page {
+    grid-template-columns: 15rem minmax(0, 1fr);
+    align-items: start;
+    padding-top: 3.2rem;
+  }
+}
+
+.doc {
+  max-width: var(--content-width);
+  width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+}
+
+/* ========== 見出し ========== */
+.doc h1, .doc h2, .doc h3, .doc h4, .doc h5, .doc h6 {
+  font-weight: 650;
+  line-height: 1.35;
+  margin: 2.2em 0 0.7em;
+  scroll-margin-top: 1.5rem;
+}
+.doc > h1:first-child, .doc .doc__header + h1 { margin-top: 0.2em; }
+.doc h1 {
+  font-size: 1.95em;
+  letter-spacing: -0.01em;
+  padding-bottom: 0.32em;
+  border-bottom: 2.5px solid var(--accent-soft);
+}
+.doc h1::before {
+  content: "◆";
+  color: var(--accent);
+  font-size: 0.62em;
+  margin-right: 0.5em;
+  vertical-align: 0.18em;
+}
+.doc h2 {
+  font-size: 1.5em;
+  padding-bottom: 0.25em;
+  border-bottom: 1px solid var(--border);
+}
+.doc h3 { font-size: 1.22em; color: var(--accent-strong); }
+.doc h4 { font-size: 1.06em; }
+.doc h5, .doc h6 { font-size: 1em; color: var(--fg-soft); }
+.doc h1 + p, .doc h2 + p, .doc h3 + p { margin-top: 0; }
+
+/* ========== 段落・テキスト ========== */
+.doc p { margin: 0.95em 0; }
+.doc strong { font-weight: 680; color: var(--fg); }
+.doc em { font-style: italic; }
+.doc del, .doc s { color: var(--fg-faint); }
+.doc small { color: var(--fg-soft); }
+.doc sup, .doc sub { font-size: 0.72em; }
+
+/* ========== リンク ========== */
+.doc a {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.doc a:hover { color: var(--accent-strong); border-bottom-color: currentColor; }
+
+/* ========== リスト ========== */
+.doc ul, .doc ol { margin: 0.9em 0; padding-left: 1.5em; }
+.doc li { margin: 0.32em 0; }
+.doc li > ul, .doc li > ol { margin: 0.3em 0; }
+.doc ul { list-style: none; }
+.doc ul > li { position: relative; }
+.doc ul > li::before {
+  content: "";
+  position: absolute;
+  left: -1.05em;
+  top: 0.72em;
+  width: 0.4em;
+  height: 0.4em;
+  border-radius: 2px;
+  background: var(--accent-soft);
+  transform: rotate(45deg);
+}
+.doc ol { list-style: decimal; }
+.doc ol > li::marker { color: var(--accent); font-weight: 600; }
+
+/* task list（GFM）*/
+.doc ul.task-list { padding-left: 1.5em; }
+.doc ul.task-list > li { list-style: none; }
+.doc ul.task-list > li::before { display: none; }
+.doc ul.task-list > li > input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 1.05em; height: 1.05em;
+  margin: 0 0.55em 0 -1.6em;
+  vertical-align: -0.16em;
+  border: 1.6px solid var(--accent-soft);
+  border-radius: 5px;
+  background: var(--bg-soft);
+  position: relative;
+}
+.doc ul.task-list > li > input[type="checkbox"]:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.doc ul.task-list > li > input[type="checkbox"]:checked::after {
+  content: "✓";
+  position: absolute;
+  inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.78em;
+  color: var(--bg);
+}
+
+/* ========== インラインコード / コードブロック ========== */
+.doc code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+}
+.doc :not(pre) > code {
+  background: var(--bg-inset);
+  color: var(--accent-strong);
+  padding: 0.12em 0.4em;
+  border-radius: var(--radius-sm);
+  white-space: break-spaces;
+}
+.doc pre {
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1em 1.2em;
+  margin: 1.2em 0;
+  overflow-x: auto;
+  line-height: 1.6;
+  box-shadow: 0 1px 3px var(--shadow);
+}
+.doc pre code {
+  background: none;
+  color: var(--fg);
+  padding: 0;
+  font-size: 0.86em;
+  white-space: pre;
+}
+/* pandoc が（将来 highlight 有効化した場合に）出す skylighting ラッパへの保険 */
+.doc div.sourceCode { margin: 1.2em 0; }
+.doc div.sourceCode pre { margin: 0; }
+.doc pre > code.sourceCode > span { display: inline-block; line-height: 1.6; }
+
+/* ========== blockquote ========== */
+.doc blockquote {
+  margin: 1.3em 0;
+  padding: 0.6em 1.2em;
+  border-left: 4px solid var(--accent);
+  background: var(--bg-soft);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  color: var(--fg-soft);
+}
+.doc blockquote > :first-child { margin-top: 0; }
+.doc blockquote > :last-child { margin-bottom: 0; }
+.doc blockquote blockquote {
+  margin: 0.7em 0;
+  border-left-color: var(--accent-soft);
+}
+
+/* ========== テーブル ========== */
+.doc table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  margin: 1.4em 0;
+  font-size: 0.94em;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 1px 3px var(--shadow);
+}
+.doc thead th {
+  background: var(--bg-soft);
+  font-weight: 660;
+  text-align: left;
+  border-bottom: 2px solid var(--accent-soft);
+}
+.doc th, .doc td {
+  padding: 0.58em 0.9em;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.doc tbody tr:last-child td { border-bottom: none; }
+.doc tbody tr:nth-child(even) { background: var(--bg-inset); }
+.doc table code { font-size: 0.95em; }
+
+/* ========== 区切り線・画像 ========== */
+.doc hr {
+  border: none;
+  height: 1px;
+  margin: 2.4em 0;
+  background: linear-gradient(to right, transparent, var(--accent-soft), transparent);
+}
+.doc img, .doc svg { max-width: 100%; height: auto; }
+.doc img { border-radius: var(--radius-sm); }
+.doc figure { margin: 1.4em 0; }
+.doc figcaption { font-size: 0.88em; color: var(--fg-faint); text-align: center; margin-top: 0.5em; }
+
+/* ========== Mermaid ========== */
+.doc pre.mermaid {
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.2em;
+  text-align: center;
+  overflow-x: auto;
+  box-shadow: 0 1px 3px var(--shadow);
+}
+.doc pre.mermaid.mermaid--failed {
+  white-space: pre-wrap;
+  text-align: left;
+  color: var(--fg-faint);
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+}
+
+/* ========== ドキュメントヘッダ / フッタ ========== */
+.doc__header { margin-bottom: 1.8em; }
+.doc__title { margin-top: 0.2em; }
+.doc__subtitle { color: var(--fg-soft); font-size: 1.15em; margin-top: -0.3em; }
+.doc__author, .doc__date { color: var(--fg-faint); font-size: 0.92em; margin: 0.2em 0; }
+.doc__footer {
+  margin-top: 3.5em;
+  padding-top: 1.4em;
+  border-top: 1px solid var(--border);
+  font-size: 0.86em;
+  color: var(--fg-faint);
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+}
+.doc__footer-mark {
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+.doc__footer-mark::before { content: "◆ "; }
+
+/* ========== 目次（サイドバー、wide 画面のみ sticky）========== */
+.toc { min-width: 0; }
+.toc__inner {
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.1em 1.25em 1.3em;
+  font-size: 0.86em;
+  box-shadow: 0 1px 3px var(--shadow);
+}
+@media (min-width: 60rem) {
+  .toc__inner {
+    position: sticky;
+    top: 1.5rem;
+    max-height: calc(100vh - 3rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+.toc__title {
+  margin: 0 0 0.6em;
+  font-size: 0.95em;
+  font-weight: 660;
+  color: var(--accent);
+  border: none;
+  padding: 0;
+}
+.toc__title::before { content: "◆ "; font-size: 0.8em; }
+.toc ul { list-style: none; margin: 0; padding-left: 0.85em; }
+.toc__inner > ul { padding-left: 0; }
+.toc li { margin: 0.16em 0; line-height: 1.45; }
+.toc li::before { display: none; }
+.toc a {
+  color: var(--fg-soft);
+  border: none;
+  display: block;
+  padding: 0.06em 0;
+  overflow-wrap: anywhere;
+}
+.toc a:hover { color: var(--accent); border: none; }
+.toc__inner > ul > li > a { color: var(--fg); font-weight: 560; }
+
+/* ========== レスポンシブ微調整 ========== */
+@media (max-width: 36rem) {
+  body { font-size: 16px; line-height: 1.72; }
+  .page { padding: 1.6rem 1.05rem 3rem; gap: 1.4rem; }
+  .doc h1 { font-size: 1.7em; }
+  .doc h2 { font-size: 1.35em; }
+  .doc pre { padding: 0.9em 1em; }
+}
+
+/* 印刷 */
+@media print {
+  .page { display: block; max-width: none; padding: 0; }
+  .toc { display: none; }
+  .doc pre, .doc table, .doc blockquote { box-shadow: none; }
+}
