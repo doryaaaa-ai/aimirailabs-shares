@@ -79,9 +79,11 @@ body {
 }
 
 /* ========== レイアウト ========== */
+/* minmax(0, 1fr) 必須: 0 の min を明示しないと、中の <pre>（white-space:pre の長い行）等の
+   min-content がトラックを画面幅以上に膨らませ、overflow-x:clip と相まって本文が右で見切れる。*/
 .page {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
 }
 @media (min-width: 60rem) {
   .page {
@@ -93,6 +95,7 @@ body {
 .doc {
   max-width: var(--content-width);
   width: 100%;
+  min-width: 0;            /* グリッドアイテムが中身に押し広げられないように（上記コメント参照）*/
   padding: 2.2rem 1.3rem 4rem;
   word-wrap: break-word;
   overflow-wrap: anywhere;
@@ -394,8 +397,11 @@ body {
 
 /* ========== レスポンシブ微調整 ========== */
 @media (max-width: 48rem) {
-  /* 横長テーブルはページ全体ではなくテーブル内で横スクロール */
-  .doc table { display: block; overflow-x: auto; }
+  /* 狭い画面: テーブルは画面幅に収める（横にはみ出さない・右が見切れない）。
+     列幅は均等割り、セル内テキストは折り返す。行は縦に伸びるが横スクロールは発生しない。 */
+  .doc table { table-layout: fixed; font-size: 0.82em; }
+  .doc th, .doc td { padding: 0.45em 0.55em; overflow-wrap: anywhere; }
+  .doc th, .doc td, .doc table code { word-break: break-word; }
 }
 @media (max-width: 36rem) {
   body { font-size: 16px; line-height: 1.72; }
