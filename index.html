@@ -8,8 +8,9 @@
   <link rel="stylesheet" href="./assets/aimirai-doc.css" />
   <style>
     .landing { min-height: 70vh; display: flex; flex-direction: column; justify-content: center; }
-    .landing__mark { font-size: 2.6rem; color: var(--accent); line-height: 1; }
-    .landing h1 { border: none; padding: 0; margin: 0.6rem 0 0.3rem; }
+    .landing__mark { color: var(--accent); line-height: 0; }
+    .landing__mark svg { width: 3rem; height: 3rem; }
+    .landing h1 { border: none; padding: 0; margin: 0.7rem 0 0.3rem; }
     .landing h1::before { content: none; }
     .landing p { color: var(--fg-soft); max-width: 34rem; }
   </style>
@@ -17,7 +18,7 @@
 <body>
 <div class="page" style="grid-template-columns: 1fr;">
 <article class="doc landing">
-  <div class="landing__mark">◆</div>
+  <div class="landing__mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" aria-hidden="true"><path d="M9 3.5V1.6M15 3.5V1.6M9 20.5v1.9M15 20.5v1.9M3.5 9H1.6M3.5 15H1.6M20.5 9h1.9M20.5 15h1.9"/><rect x="3.5" y="3.5" width="17" height="17" rx="4.2"/><g fill="currentColor" stroke="none"><rect x="9.4" y="9.3" width="1.8" height="5.4" rx=".9"/><rect x="12.8" y="9.3" width="1.8" height="5.4" rx=".9"/></g></svg></div>
   <h1>AiMirai Labs — shared documents</h1>
   <p>このサイトには AiMirai Labs が個別に共有したドキュメントが置かれています。各ドキュメントには共有元から渡された URL（<code>/s/&lt;ハッシュ&gt;.html</code>）で直接アクセスしてください。</p>
   <p style="font-size: 0.88em; color: var(--fg-faint);">内部ドキュメント（Markdown）を <code>show-html</code> パイプラインで HTML 化したものです。</p>
