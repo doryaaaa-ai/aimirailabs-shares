@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc + AiMirai Labs show-html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>decchan-takeover-checklist.md — AiMirai Labs</title>
+  <style>
+  /* aimirai-doc.css — AiMirai Labs「シックでかわいい」固定ドキュメントテーマ
+   * 用途: show-html.sh が pandoc で MD → HTML 変換する際に <style> として inline 埋め込み（Issue #513）
+   * 配色: 暖色オフホワイト背景 + ダークブラウン寄りチャコール本文 + ブラウンのアクセント（固定 = ライト 1 種）
+   *       social / 投資家 / 営業向け共有は明るい方が映えるため、ダークモードは持たない（CEO 確定 session 44）
+   * レイアウト: 上部に固定ヘッダーバー / デスクトップ = 左ナビ目次 + 画面幅いっぱいのコンテンツ /
+   *            スマホ = 単カラム + 目次折りたたみ。横スクロールはロック（画面が横にずれない）。
+   */
+
+  /* ========== カラートークン ========== */
+  :root {
+    color-scheme: light;
+
+    --bg:            #faf7f2;  /* 暖色オフホワイト（背景）*/
+    --bg-soft:       #f2ebde;  /* クリーム（コード/カード/ヘッダーバー背景）*/
+    --bg-inset:      #eadfca;  /* やや濃いクリーム（テーブル縞 / インラインコード）*/
+    --fg:            #3a322d;  /* ダークブラウン寄りチャコール（本文）*/
+    --fg-soft:       #6c5f54;  /* 控えめ */
+    --fg-faint:      #94867a;  /* さらに薄い（補足・脚注）*/
+    --accent:        #8b5e34;  /* ブラウン（リンク・見出し罫・強調）*/
+    --accent-strong: #6e4a28;  /* ブラウン濃（ホバー・h3）*/
+    --accent-soft:   #d9bd96;  /* ブラウン淡（罫・装飾）*/
+    --border:        #e3d8c5;  /* 罫線 */
+    --shadow:        rgba(58, 50, 45, 0.10);
+    --selection:     #e8d3b0;
+
+    --radius-sm: 7px;
+    --radius:    11px;
+    --radius-lg: 16px;
+    --topbar-h: 3rem;
+
+    /* チップくん（AiMirai Labs ロゴ）: アウトライン1色 SVG。見出し ::before / フッタで使い回す */
+    --chip-svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b5e34' stroke-width='2.1' stroke-linecap='round'%3E%3Cpath d='M9 3.5V1.6M15 3.5V1.6M9 20.5v1.9M15 20.5v1.9M3.5 9H1.6M3.5 15H1.6M20.5 9h1.9M20.5 15h1.9'/%3E%3Crect x='3.5' y='3.5' width='17' height='17' rx='4.2'/%3E%3Cg fill='%238b5e34' stroke='none'%3E%3Crect x='9.4' y='9.3' width='1.8' height='5.4' rx='.9'/%3E%3Crect x='12.8' y='9.3' width='1.8' height='5.4' rx='.9'/%3E%3C/g%3E%3C/svg%3E");
+
+    --content-width: 58rem;     /* ≒ 930px（テーブル / コードが多い spec でも読みやすい幅で頭打ち）*/
+    --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, "Roboto Mono", "Noto Sans Mono", monospace;
+  }
+
+  /* ========== ベース ========== */
+  * { box-sizing: border-box; }
+  html {
+    scroll-behavior: smooth;
+    background: var(--bg);
+    color: var(--fg);
+    overflow-x: clip;          /* 横スクロール禁止（画面が横にずれない）*/
+  }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-size: 16.5px;
+    line-height: 1.78;
+    letter-spacing: 0.005em;
+    overflow-x: clip;          /* 横スクロール禁止（保険）*/
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection { background: var(--selection); }
+
+  /* ========== 固定ヘッダーバー ========== */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    height: var(--topbar-h);
+    padding: 0 1.05rem;
+    background: var(--bg-soft);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .topbar__brand { flex: none; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 660; letter-spacing: 0.02em; color: var(--accent); }
+  .chip-icon { flex: none; width: 1.18em; height: 1.18em; }   /* inline SVG（currentColor 継承）*/
+  .topbar__sep   { flex: none; color: var(--fg-faint); }
+  .topbar__doc   { color: var(--fg-soft); overflow: hidden; text-overflow: ellipsis; }
+  @media (min-width: 60rem) {
+    .topbar { padding: 0 1.6rem; font-size: 0.95rem; }
+  }
+
+  /* ========== レイアウト ========== */
+  /* minmax(0, 1fr) 必須: 0 の min を明示しないと、中の <pre>（white-space:pre の長い行）等の
+     min-content がトラックを画面幅以上に膨らませ、overflow-x:clip と相まって本文が右で見切れる。*/
+  .page {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  @media (min-width: 60rem) {
+    .page {
+      grid-template-columns: 17rem minmax(0, 1fr);
+      align-items: start;
+    }
+  }
+
+  .doc {
+    max-width: var(--content-width);
+    width: 100%;
+    min-width: 0;            /* グリッドアイテムが中身に押し広げられないように（上記コメント参照）*/
+    padding: 2.2rem 1.3rem 4rem;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+  }
+  @media (min-width: 60rem) {
+    .doc { padding: 3rem 3rem 5rem; }
+  }
+  @media (max-width: 36rem) {
+    .doc { padding: 1.6rem 1.05rem 3rem; }
+  }
+
+  /* ========== 見出し ========== */
+  .doc h1, .doc h2, .doc h3, .doc h4, .doc h5, .doc h6 {
+    font-weight: 650;
+    line-height: 1.35;
+    margin: 2.2em 0 0.7em;
+    scroll-margin-top: calc(var(--topbar-h) + 0.8rem);   /* アンカー時にヘッダーバーの下に来る */
+  }
+  .doc > h1:first-child { margin-top: 0.2em; }
+  .doc h1 {
+    font-size: 1.95em;
+    letter-spacing: -0.01em;
+    padding-bottom: 0.32em;
+    border-bottom: 2.5px solid var(--accent-soft);
+  }
+  .doc h1::before {
+    content: "";
+    display: inline-block;
+    width: 0.78em;
+    height: 0.78em;
+    margin-right: 0.42em;
+    vertical-align: -0.02em;
+    background: var(--chip-svg) no-repeat center / contain;
+  }
+  .doc h2 {
+    font-size: 1.5em;
+    padding-bottom: 0.25em;
+    border-bottom: 1px solid var(--border);
+  }
+  .doc h3 { font-size: 1.22em; color: var(--accent-strong); }
+  .doc h4 { font-size: 1.06em; }
+  .doc h5, .doc h6 { font-size: 1em; color: var(--fg-soft); }
+  .doc h1 + p, .doc h2 + p, .doc h3 + p { margin-top: 0; }
+
+  /* ========== 段落・テキスト ========== */
+  .doc p { margin: 0.95em 0; }
+  .doc strong { font-weight: 680; color: var(--fg); }
+  .doc em { font-style: italic; }
+  .doc del, .doc s { color: var(--fg-faint); }
+  .doc small { color: var(--fg-soft); }
+  .doc sup, .doc sub { font-size: 0.72em; }
+
+  /* ========== リンク ========== */
+  .doc a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+  .doc a:hover { color: var(--accent-strong); border-bottom-color: currentColor; }
+
+  /* ========== リスト ========== */
+  .doc ul, .doc ol { margin: 0.9em 0; padding-left: 1.5em; }
+  .doc li { margin: 0.32em 0; }
+  .doc li > ul, .doc li > ol { margin: 0.3em 0; }
+  .doc ul { list-style: none; }
+  .doc ul > li { position: relative; }
+  .doc ul > li::before {
+    content: "";
+    position: absolute;
+    left: -1.05em;
+    top: 0.72em;
+    width: 0.4em;
+    height: 0.4em;
+    border-radius: 2px;
+    background: var(--accent-soft);
+    transform: rotate(45deg);
+  }
+  .doc ol { list-style: decimal; }
+  .doc ol > li::marker { color: var(--accent); font-weight: 600; }
+
+  /* task list（GFM — pandoc は <li><label><input type=checkbox>テキスト</label></li> 構造で出力）*/
+  .doc ul.task-list { padding-left: 1.5em; }
+  .doc ul.task-list > li { list-style: none; }
+  .doc ul.task-list > li::before { display: none; }
+  .doc ul.task-list li input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 1.05em; height: 1.05em;
+    margin: 0 0.5em 0 -1.65em;
+    vertical-align: -0.16em;
+    border: 1.6px solid var(--accent-soft);
+    border-radius: 5px;
+    background-color: var(--bg-soft);
+  }
+  .doc ul.task-list li input[type="checkbox"]:checked {
+    border-color: var(--accent);
+    background-color: var(--accent);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.4 8.6l3 3 6.2-7.2' fill='none' stroke='%23faf7f2' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 0.82em;
+  }
+
+  /* ========== インラインコード / コードブロック ========== */
+  .doc code {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+  }
+  .doc :not(pre) > code {
+    background: var(--bg-inset);
+    color: var(--accent-strong);
+    padding: 0.12em 0.4em;
+    border-radius: var(--radius-sm);
+    white-space: break-spaces;
+  }
+  .doc pre {
+    max-width: 100%;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1em 1.2em;
+    margin: 1.2em 0;
+    overflow-x: auto;
+    line-height: 1.6;
+    box-shadow: 0 1px 3px var(--shadow);
+  }
+  .doc pre code {
+    background: none;
+    color: var(--fg);
+    padding: 0;
+    font-size: 0.86em;
+    white-space: pre;
+  }
+  /* pandoc が（将来 highlight 有効化した場合に）出す skylighting ラッパへの保険 */
+  .doc div.sourceCode { margin: 1.2em 0; max-width: 100%; }
+  .doc div.sourceCode pre { margin: 0; }
+  .doc pre > code.sourceCode > span { display: inline-block; line-height: 1.6; }
+
+  /* ========== blockquote ========== */
+  .doc blockquote {
+    margin: 1.3em 0;
+    padding: 0.6em 1.2em;
+    border-left: 4px solid var(--accent);
+    background: var(--bg-soft);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    color: var(--fg-soft);
+  }
+  .doc blockquote > :first-child { margin-top: 0; }
+  .doc blockquote > :last-child { margin-bottom: 0; }
+  .doc blockquote blockquote {
+    margin: 0.7em 0;
+    border-left-color: var(--accent-soft);
+  }
+
+  /* ========== テーブル ========== */
+  .doc table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    max-width: 100%;
+    margin: 1.4em 0;
+    font-size: 0.94em;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: 0 1px 3px var(--shadow);
+  }
+  .doc thead th {
+    background: var(--bg-soft);
+    font-weight: 660;
+    text-align: left;
+    border-bottom: 2px solid var(--accent-soft);
+  }
+  .doc th, .doc td {
+    padding: 0.58em 0.9em;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .doc tbody tr:last-child td { border-bottom: none; }
+  .doc tbody tr:nth-child(even) { background: var(--bg-inset); }
+  .doc table code { font-size: 0.95em; }
+
+  /* ========== 区切り線・画像 ========== */
+  .doc hr {
+    border: none;
+    height: 1px;
+    margin: 2.4em 0;
+    background: linear-gradient(to right, transparent, var(--accent-soft), transparent);
+  }
+  .doc img, .doc svg { max-width: 100%; height: auto; }
+  .doc img { border-radius: var(--radius-sm); }
+  .doc figure { margin: 1.4em 0; }
+  .doc figcaption { font-size: 0.88em; color: var(--fg-faint); text-align: center; margin-top: 0.5em; }
+
+  /* ========== Mermaid ========== */
+  .doc pre.mermaid {
+    max-width: 100%;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.2em;
+    text-align: center;
+    overflow-x: auto;
+    box-shadow: 0 1px 3px var(--shadow);
+  }
+  .doc pre.mermaid.mermaid--failed {
+    white-space: pre-wrap;
+    text-align: left;
+    color: var(--fg-faint);
+    font-family: var(--font-mono);
+    font-size: 0.82em;
+  }
+
+  /* ========== ドキュメントヘッダ / フッタ ========== */
+  .doc__header { margin-bottom: 1.8em; }
+  .doc__title { margin-top: 0.2em; }
+  .doc__subtitle { color: var(--fg-soft); font-size: 1.15em; margin-top: -0.3em; }
+  .doc__author, .doc__date { color: var(--fg-faint); font-size: 0.92em; margin: 0.2em 0; }
+  .doc__footer {
+    margin-top: 3.5em;
+    padding-top: 1.4em;
+    border-top: 1px solid var(--border);
+    font-size: 0.86em;
+    color: var(--fg-faint);
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+  }
+  .doc__footer-mark {
+    font-weight: 650;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+  }
+  .doc__footer-mark::before {
+    content: "";
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    margin-right: 0.32em;
+    vertical-align: -0.18em;
+    background: var(--chip-svg) no-repeat center / contain;
+  }
+
+  /* ========== 目次（<details>: デスクトップ=左ナビ常時展開、スマホ=折りたたみカード）========== */
+  .toc { min-width: 0; }
+  .toc__title {
+    margin: 0;
+    font-size: 0.95em;
+    font-weight: 660;
+    color: var(--accent);
+    cursor: pointer;
+    list-style: none;          /* デフォルトの開閉三角を消す */
+    user-select: none;
+  }
+  .toc__title::-webkit-details-marker { display: none; }
+  .toc__title::before {
+    content: "▸";
+    display: inline-block;
+    margin-right: 0.5em;
+    font-size: 0.8em;
+    transition: transform 0.15s ease;
+  }
+  .toc[open] > .toc__title::before { transform: rotate(90deg); }
+  .toc ul { list-style: none; margin: 0; padding-left: 0.85em; }
+  .toc__body > ul { padding-left: 0; }
+  .toc li { margin: 0.16em 0; line-height: 1.45; }
+  .toc li::before { display: none; }
+  .toc a {
+    color: var(--fg-soft);
+    border: none;
+    display: block;
+    padding: 0.06em 0;
+    overflow-wrap: anywhere;
+  }
+  .toc a:hover { color: var(--accent); border: none; }
+  .toc__body > ul > li > a { color: var(--fg); font-weight: 560; }
+
+  /* デスクトップ: 左ナビ（カード装飾なし、ヘッダーバー直下に sticky、本文と縦罫で区切る）*/
+  @media (min-width: 60rem) {
+    .toc {
+      position: sticky;
+      top: var(--topbar-h);
+      align-self: start;
+      border-right: 1px solid var(--border);
+      font-size: 0.85em;
+    }
+    .toc__title { padding: 1.4rem 1.3rem 0.6rem 1.5rem; }
+    .toc__body {
+      padding: 0 1rem 1.6rem 1.5rem;
+      max-height: calc(100vh - var(--topbar-h) - 3.2rem);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+  }
+  /* スマホ / タブレット: 折りたたみカード（タップで展開、展開しても画面を占有しすぎないようスクロール可）*/
+  @media (max-width: 59.99rem) {
+    .toc {
+      margin: 1.1rem 1.05rem 0;
+      background: var(--bg-soft);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 1px 3px var(--shadow);
+      font-size: 0.88em;
+    }
+    .toc__title { padding: 0.8em 1.15em; }
+    .toc__body { padding: 0 1.15em 1em; max-height: 50vh; overflow-y: auto; }
+  }
+
+  /* ========== レスポンシブ微調整 ========== */
+  @media (max-width: 48rem) {
+    /* 狭い画面: テーブルは画面幅に収める（横にはみ出さない・右が見切れない）。
+       列幅は均等割り、セル内テキストは折り返す。行は縦に伸びるが横スクロールは発生しない。 */
+    .doc table { table-layout: fixed; font-size: 0.82em; }
+    .doc th, .doc td { padding: 0.45em 0.55em; overflow-wrap: anywhere; }
+    .doc th, .doc td, .doc table code { word-break: break-word; }
+  }
+  @media (max-width: 36rem) {
+    body { font-size: 16px; line-height: 1.72; }
+    .doc h1 { font-size: 1.7em; }
+    .doc h2 { font-size: 1.35em; }
+    .doc pre { padding: 0.9em 1em; }
+  }
+
+  /* 印刷 */
+  @media print {
+    .topbar { display: none; }
+    .page { display: block; }
+    .toc { display: none; }
+    .doc { max-width: none; padding: 0; }
+    .doc pre, .doc table, .doc blockquote { box-shadow: none; }
+  }
+  </style>
+</head>
+<body>
+<header class="topbar">
+  <!-- チップくんアイコン: ジオメトリは aimirai-doc.css の --chip-svg と同一に保つ（こちらは currentColor 継承の inline 版）-->
+  <span class="topbar__brand"><svg class="chip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" aria-hidden="true"><path d="M9 3.5V1.6M15 3.5V1.6M9 20.5v1.9M15 20.5v1.9M3.5 9H1.6M3.5 15H1.6M20.5 9h1.9M20.5 15h1.9"/><rect x="3.5" y="3.5" width="17" height="17" rx="4.2"/><g fill="currentColor" stroke="none"><rect x="9.4" y="9.3" width="1.8" height="5.4" rx=".9"/><rect x="12.8" y="9.3" width="1.8" height="5.4" rx=".9"/></g></svg><span>AiMirai&nbsp;Labs</span></span>
+  <span class="topbar__sep" aria-hidden="true">/</span><span class="topbar__doc">decchan-takeover-checklist.md</span>
+</header>
+<div class="page">
+<details class="toc" role="doc-toc">
+<summary class="toc__title">目次</summary>
+<div class="toc__body">
+<ul>
+<li><a href="#でっくすちゃん-cto-代打-セットアップチェックリスト"
+id="toc-でっくすちゃん-cto-代打-セットアップチェックリスト">でっくすちゃん
+CTO 代打 セットアップチェックリスト</a>
+<ul>
+<li><a href="#-toc" id="toc--toc">■ TOC</a></li>
+<li><a href="#-目的" id="toc--目的">■ 目的</a></li>
+<li><a href="#-機能対応分類でっくす本人による評価"
+id="toc--機能対応分類でっくす本人による評価">■
+機能対応分類（でっくす本人による評価）</a></li>
+<li><a href="#-最小共有セットcto-入替の前提条件"
+id="toc--最小共有セットcto-入替の前提条件">■ 最小共有セット（CTO
+入替の前提条件）</a></li>
+<li><a href="#-でっくすに設定してやるべき項目実装-todo"
+id="toc--でっくすに設定してやるべき項目実装-todo">■
+でっくすに「設定してやる」べき項目（実装 TODO）</a>
+<ul>
+<li><a href="#a-起動準備" id="toc-a-起動準備">A. 起動準備</a></li>
+<li><a href="#b-tmux-統合" id="toc-b-tmux-統合">B. tmux 統合</a></li>
+<li><a href="#c-切替トリガー" id="toc-c-切替トリガー">C.
+切替トリガー</a></li>
+<li><a href="#d-状態保存引継ぎ" id="toc-d-状態保存引継ぎ">D.
+状態保存・引継ぎ</a></li>
+<li><a href="#e-sub-agent-互換" id="toc-e-sub-agent-互換">E. Sub-agent
+互換</a></li>
+<li><a href="#f-通知ブリッジ" id="toc-f-通知ブリッジ">F.
+通知ブリッジ</a></li>
+<li><a href="#g-監査復旧" id="toc-g-監査復旧">G. 監査・復旧</a></li>
+</ul></li>
+<li><a href="#-工数見積もりでっくす本人"
+id="toc--工数見積もりでっくす本人">■
+工数見積もり（でっくす本人）</a></li>
+<li><a href="#-実装順序推奨" id="toc--実装順序推奨">■
+実装順序（推奨）</a></li>
+<li><a href="#-諦める損失覚悟事項" id="toc--諦める損失覚悟事項">■
+諦める損失（覚悟事項）</a></li>
+<li><a href="#-関連-issue--pr" id="toc--関連-issue--pr">■ 関連 Issue /
+PR</a></li>
+<li><a href="#-互換性意識ルール今後の開発で守る"
+id="toc--互換性意識ルール今後の開発で守る">■
+互換性意識ルール（今後の開発で守る）</a></li>
+</ul></li>
+</ul>
+</div>
+</details>
+<article class="doc">
+<h1
+id="でっくすちゃん-cto-代打-セットアップチェックリスト">でっくすちゃん
+CTO 代打 セットアップチェックリスト</h1>
+<p>更新日: 2026-05-04</p>
+<p>索引集（cheatsheet）: <a
+href="decchan-takeover-checklist-brief.md"><code>decchan-takeover-checklist-brief.md</code></a></p>
+<h2 id="-toc">■ TOC</h2>
+<ul>
+<li>■ 目的</li>
+<li>■ 機能対応分類（でっくす本人による評価）</li>
+<li>■ 最小共有セット（CTO 入替の前提条件）</li>
+<li>■ でっくすに「設定してやる」べき項目（実装 TODO）</li>
+<li>■ 工数見積もり（でっくす本人）</li>
+<li>■ 実装順序（推奨）</li>
+<li>■ 諦める損失（覚悟事項）</li>
+<li>■ 関連 Issue / PR</li>
+<li>■ 互換性意識ルール（今後の開発で守る）</li>
+</ul>
+<hr />
+<h2 id="-目的">■ 目的</h2>
+<p>ワイ（コードちゃん / Claude Opus 4.7）が usage 枯渇 or
+一時不調になった時、でっくすちゃん（Codex / GPT-5.5）が <strong>暫定
+CTO</strong> として代打できる体制を整える。</p>
+<p>CEO 議論で確定：</p>
+<ul>
+<li>緊急時暫定: でっくす単独で CTO 引受け</li>
+<li>恒常運用: 通常はワイ続行、必要時のみ手動 <code>/decchan</code>
+で切替</li>
+<li>自動切替: ワイ usage 90% で予防的切替</li>
+<li>最終裁定: CEO</li>
+</ul>
+<h2 id="-機能対応分類でっくす本人による評価">■
+機能対応分類（でっくす本人による評価）</h2>
+<table>
+<thead>
+<tr>
+<th>区分</th>
+<th>機能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>そのまま使える</strong></td>
+<td>AGENTS.md / MCP / Discord MCP / tmux 常駐</td>
+</tr>
+<tr>
+<td><strong>代替実装必要</strong></td>
+<td>SessionStart hook / PreCompact hook / Skills（slash commands）/
+Sub-agents / RemoteControl</td>
+</tr>
+<tr>
+<td><strong>諦め</strong></td>
+<td>Claude Code 固有の hook/slash/subagent ネイティブ UX 統合感</td>
+</tr>
+</tbody>
+</table>
+<h2 id="-最小共有セットcto-入替の前提条件">■ 最小共有セット（CTO
+入替の前提条件）</h2>
+<p>代打が「実用に耐える」ためのミニマム6点：</p>
+<ul class="task-list">
+<li><label><input type="checkbox" /><code>HANDOFF.md</code>
+モデル中立フォーマット</label></li>
+<li><label><input type="checkbox" /><code>AGENTS.md</code>
+の継続メンテ（CLAUDE.md と二重管理）</label></li>
+<li><label><input type="checkbox" />MCP 設定（Discord、Telegram
+等）</label></li>
+<li><label><input type="checkbox" />Discord 窓口（既存の bot
+トークン共有）</label></li>
+<li><label><input type="checkbox" />tmux supervisor（CLI
+切替対応）</label></li>
+<li><label><input type="checkbox" />状態保存スクリプト +
+タスクキュー（外部化）</label></li>
+</ul>
+<h2 id="-でっくすに設定してやるべき項目実装-todo">■
+でっくすに「設定してやる」べき項目（実装 TODO）</h2>
+<h3 id="a-起動準備">A. 起動準備</h3>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>Codex
+起動ラッパー作成</strong>:
+<code>scripts/system-setup/decchan-launcher.sh</code></label>
+<ul>
+<li>workdir 設定（<code>/home/aimiral/AiMiraiLabs</code>）</li>
+<li>環境変数 export（必要な API キー、ENV scrub 済み）</li>
+<li>HANDOFF.md / AGENTS.md / docs/systems/magi.md
+を起動時プロンプトに注入</li>
+</ul></li>
+<li><label><input type="checkbox" /><strong>AGENTS.md 完備確認</strong>:
+ぐるぐる用 GEMINI.md と同レベルの詳細さで CTO
+代打時の振る舞い定義</label></li>
+</ul>
+<h3 id="b-tmux-統合">B. tmux 統合</h3>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>tmux
+ウィンドウ管理</strong>: 通常時は claude（ワイ）、代打時は
+decchan（codex）</label>
+<pre><code>tmux new-session -s magi
+ ├─ window 0: claude (CTO アクティブ)
+ └─ window 1: decchan (待機 or アクティブ)</code></pre></li>
+<li><label><input
+type="checkbox" /><strong>botちゃん死活監視拡張</strong>: 「Claude usage
+枯渇検知」を既存 watchdog に追加</label></li>
+<li><label><input
+type="checkbox" /><strong>メッセージルーティング</strong>:
+<code>current_routing</code> フラグ（<code>claude</code> /
+<code>codex</code>）に応じて Discord メッセージを投げ分け</label></li>
+</ul>
+<h3 id="c-切替トリガー">C. 切替トリガー</h3>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>手動切替</strong>:
+<code>/decchan</code> slash command（Discord）</label></li>
+<li><label><input type="checkbox" /><strong>手動復帰</strong>:
+<code>/decchan off</code> または <code>/codechan</code></label></li>
+<li><label><input type="checkbox" /><strong>自動切替</strong>: ワイ
+usage 90% で予防的切替（ccusage CLI で監視）</label></li>
+<li><label><input type="checkbox" /><strong>自動復帰</strong>: ワイ
+usage リセット検知 → 通常運用に戻す</label></li>
+</ul>
+<h3 id="d-状態保存引継ぎ">D. 状態保存・引継ぎ</h3>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>PreCompact 相当</strong>:
+定期スナップショット（5分ごと or トークン使用量閾値ごと）</label>
+<ul>
+<li>出力先: <code>~/.magi/state/&lt;timestamp&gt;.json</code></li>
+<li>内容: 進行中タスク、未解決論点、最終 CEO 指示、決定事項</li>
+</ul></li>
+<li><label><input type="checkbox" /><strong>HANDOFF_DECCHAN.md</strong>:
+でっくす代打中の議論を記録（ワイ復帰時の引継ぎ用）</label></li>
+<li><label><input type="checkbox" /><strong>タスクキュー</strong>:
+未完了タスクを外部 JSON
+で持つ（<code>~/.magi/queue.json</code>）</label></li>
+</ul>
+<h3 id="e-sub-agent-互換">E. Sub-agent 互換</h3>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>でっくすが verify-chan /
+worker / guruguru-cko を呼べるか確認</strong></label>
+<ul>
+<li>Claude Code の <code>Agent</code> tool は Codex CLI
+に存在しない</li>
+<li>代替: <code>codex exec</code> 多段呼び出し or 外部スクリプトで
+spawn</li>
+</ul></li>
+</ul>
+<h3 id="f-通知ブリッジ">F. 通知ブリッジ</h3>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>RemoteControl 代替</strong>:
+PushNotification の代替を Discord MCP で実装</label>
+<ul>
+<li>Telegram bot 経由の通知は既存ブリッジ流用可</li>
+</ul></li>
+</ul>
+<h3 id="g-監査復旧">G. 監査・復旧</h3>
+<ul class="task-list">
+<li><label><input type="checkbox" /><strong>監査ログ</strong>:
+でっくす代打中の決定を <code>~/.magi/decchan-audit.jsonl</code>
+に記録（Phase E と統合）</label></li>
+<li><label><input
+type="checkbox" /><strong>ワイ復帰時の事後監査</strong>:
+ベリちゃんが代打期間中の全 PR を再検算</label></li>
+</ul>
+<h2 id="-工数見積もりでっくす本人">■ 工数見積もり（でっくす本人）</h2>
+<ul>
+<li><strong>PoC（最小動作）</strong>: 2-3人日</li>
+<li><strong>本番運用品質</strong>: 7-12人日</li>
+<li><strong>監視・復旧・移行リハ込み</strong>:
+<strong>15人日</strong></li>
+</ul>
+<h2 id="-実装順序推奨">■ 実装順序（推奨）</h2>
+<ol type="1">
+<li><strong>A. 起動準備</strong> + <strong>B. tmux 統合</strong> =
+代打が「動く」状態（最初の 2-3人日）</li>
+<li><strong>C. 切替トリガー</strong> + <strong>F. 通知ブリッジ</strong>
+= CEO が手動 ON/OFF できる（次の 3-4人日）</li>
+<li><strong>D. 状態保存</strong> + <strong>E. Sub-agent 互換</strong> =
+代打が「役に立つ」状態（次の 3-4人日）</li>
+<li><strong>G. 監査・復旧</strong> = 安全に運用できる（最後の
+2-3人日）</li>
+</ol>
+<h2 id="-諦める損失覚悟事項">■ 諦める損失（覚悟事項）</h2>
+<ul>
+<li>Claude Code 固有の <strong>hook/slash/subagent ネイティブ
+UX</strong>（イベント駆動の滑らかさ）</li>
+<li>機能は再現できるが、Claude Code ほど統合感は出ない</li>
+</ul>
+<h2 id="-関連-issue--pr">■ 関連 Issue / PR</h2>
+<ul>
+<li>TBD: <code>[magi/decchan-takeover-implementation]</code>
+代打発動ロジック</li>
+<li>TBD: <code>[magi/handoff-md-neutralize]</code> HANDOFF.md
+モデル中立化</li>
+<li>TBD: <code>[magi/orchestration-layer-design]</code> 中長期 CTO
+入替設計</li>
+</ul>
+<h2 id="-互換性意識ルール今後の開発で守る">■
+互換性意識ルール（今後の開発で守る）</h2>
+<p>CEO 確定方針：これからは互換性に気を付けて開発する。</p>
+<ul>
+<li><strong>新仕様書は CLAUDE.md と AGENTS.md / GEMINI.md
+に同時書き</strong></li>
+<li><strong>新 hook 追加時</strong>: Codex/Gemini
+でも代替できるか確認</li>
+<li><strong>新 skill 追加時</strong>: slash command
+か外部スクリプトでも実装できるか確認</li>
+<li><strong>状態保存は Markdown / JSON
+ベース</strong>（モデル中立フォーマット維持）</li>
+<li><strong>Sub-agent 定義</strong>: モデル名ハードコード禁止</li>
+</ul>
+<footer class="doc__footer">
+  <span class="doc__footer-mark">AiMirai Labs</span>
+
+</footer>
+</article>
+</div>
+<script>
+  // 目次（<details>）: ワイド画面では既定で開いてサイドバー表示、狭い画面（スマホ）では
+  // 折りたたんだ「目次 ▸」のまま（タップで展開）。JS 無効でも狭い画面はこの挙動になる。
+  (function () {
+    var t = document.querySelector("details.toc");
+    if (t && window.matchMedia("(min-width: 60rem)").matches) t.open = true;
+  })();
+</script>
+<script>
+  // Mermaid: pandoc gfm が出力する ```mermaid フェンスをビューアのブラウザ内で SVG レンダ。
+  // mermaid 本体（shares リポの assets/mermaid.min.js、UMD 単一ファイル vendor）は
+  // mermaid フェンスがあるページでのみ遅延ロード（無いページでは何も読み込まない＝HTML も軽量）。
+  // s/<hash>.html から見て ../assets/mermaid.min.js。サーバに Chromium は不要。
+  (function () {
+    var nodes = document.querySelectorAll(
+      "pre.mermaid > code, pre > code.language-mermaid, pre > code.mermaid"
+    );
+    if (!nodes.length) return;
+    nodes.forEach(function (code) {
+      var pre = code.closest("pre");
+      pre.className = "mermaid";
+      pre.textContent = code.textContent;
+    });
+    var s = document.createElement("script");
+    s.src = "../assets/mermaid.min.js";
+    s.onload = function () {
+      try {
+        window.mermaid.initialize({ startOnLoad: false, theme: "neutral", securityLevel: "strict" });
+        window.mermaid.run({ querySelector: "pre.mermaid" });
+      } catch (e) { markFailed(); }
+    };
+    s.onerror = markFailed;
+    document.body.appendChild(s);
+    function markFailed() {
+      document.querySelectorAll("pre.mermaid").forEach(function (pre) {
+        pre.classList.add("mermaid--failed");
+        pre.setAttribute("title", "Mermaid 読み込み失敗（オフラインで開いた可能性）");
+      });
+    }
+  })();
+</script>
+</body>
+</html>
