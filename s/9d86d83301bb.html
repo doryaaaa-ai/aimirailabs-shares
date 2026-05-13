@@ -1,0 +1,2271 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc + AiMirai Labs show-html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2026-05-13-cto-rotation-phase1-aimirailabs.md — AiMirai
+Labs</title>
+  <style>
+  /* aimirai-doc.css — AiMirai Labs「シックでかわいい」固定ドキュメントテーマ
+   * 用途: show-html.sh が pandoc で MD → HTML 変換する際に <style> として inline 埋め込み（Issue #513）
+   * 配色: 暖色オフホワイト背景 + ダークブラウン寄りチャコール本文 + ブラウンのアクセント（固定 = ライト 1 種）
+   *       social / 投資家 / 営業向け共有は明るい方が映えるため、ダークモードは持たない（CEO 確定 session 44）
+   * レイアウト: 上部に固定ヘッダーバー / デスクトップ = 左ナビ目次 + 画面幅いっぱいのコンテンツ /
+   *            スマホ = 単カラム + 目次折りたたみ。横スクロールはロック（画面が横にずれない）。
+   */
+
+  /* ========== カラートークン ========== */
+  :root {
+    color-scheme: light;
+
+    --bg:            #faf7f2;  /* 暖色オフホワイト（背景）*/
+    --bg-soft:       #f2ebde;  /* クリーム（コード/カード/ヘッダーバー背景）*/
+    --bg-inset:      #eadfca;  /* やや濃いクリーム（テーブル縞 / インラインコード）*/
+    --fg:            #3a322d;  /* ダークブラウン寄りチャコール（本文）*/
+    --fg-soft:       #6c5f54;  /* 控えめ */
+    --fg-faint:      #94867a;  /* さらに薄い（補足・脚注）*/
+    --accent:        #8b5e34;  /* ブラウン（リンク・見出し罫・強調）*/
+    --accent-strong: #6e4a28;  /* ブラウン濃（ホバー・h3）*/
+    --accent-soft:   #d9bd96;  /* ブラウン淡（罫・装飾）*/
+    --border:        #e3d8c5;  /* 罫線 */
+    --shadow:        rgba(58, 50, 45, 0.10);
+    --selection:     #e8d3b0;
+
+    --radius-sm: 7px;
+    --radius:    11px;
+    --radius-lg: 16px;
+    --topbar-h: 3rem;
+
+    /* チップくん（AiMirai Labs ロゴ）: アウトライン1色 SVG。見出し ::before / フッタで使い回す */
+    --chip-svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b5e34' stroke-width='2.1' stroke-linecap='round'%3E%3Cpath d='M9 3.5V1.6M15 3.5V1.6M9 20.5v1.9M15 20.5v1.9M3.5 9H1.6M3.5 15H1.6M20.5 9h1.9M20.5 15h1.9'/%3E%3Crect x='3.5' y='3.5' width='17' height='17' rx='4.2'/%3E%3Cg fill='%238b5e34' stroke='none'%3E%3Crect x='9.4' y='9.3' width='1.8' height='5.4' rx='.9'/%3E%3Crect x='12.8' y='9.3' width='1.8' height='5.4' rx='.9'/%3E%3C/g%3E%3C/svg%3E");
+
+    --content-width: 58rem;     /* ≒ 930px（テーブル / コードが多い spec でも読みやすい幅で頭打ち）*/
+    --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic UI", Meiryo, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Consolas, "Roboto Mono", "Noto Sans Mono", monospace;
+  }
+
+  /* ========== ベース ========== */
+  * { box-sizing: border-box; }
+  html {
+    scroll-behavior: smooth;
+    background: var(--bg);
+    color: var(--fg);
+    overflow-x: clip;          /* 横スクロール禁止（画面が横にずれない）*/
+  }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-size: 16.5px;
+    line-height: 1.78;
+    letter-spacing: 0.005em;
+    overflow-x: clip;          /* 横スクロール禁止（保険）*/
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection { background: var(--selection); }
+
+  /* ========== 固定ヘッダーバー ========== */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    height: var(--topbar-h);
+    padding: 0 1.05rem;
+    background: var(--bg-soft);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .topbar__brand { flex: none; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 660; letter-spacing: 0.02em; color: var(--accent); }
+  .chip-icon { flex: none; width: 1.18em; height: 1.18em; }   /* inline SVG（currentColor 継承）*/
+  .topbar__sep   { flex: none; color: var(--fg-faint); }
+  .topbar__doc   { color: var(--fg-soft); overflow: hidden; text-overflow: ellipsis; }
+  @media (min-width: 60rem) {
+    .topbar { padding: 0 1.6rem; font-size: 0.95rem; }
+  }
+
+  /* ========== レイアウト ========== */
+  /* minmax(0, 1fr) 必須: 0 の min を明示しないと、中の <pre>（white-space:pre の長い行）等の
+     min-content がトラックを画面幅以上に膨らませ、overflow-x:clip と相まって本文が右で見切れる。*/
+  .page {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  @media (min-width: 60rem) {
+    .page {
+      grid-template-columns: 17rem minmax(0, 1fr);
+      align-items: start;
+    }
+  }
+
+  .doc {
+    max-width: var(--content-width);
+    width: 100%;
+    min-width: 0;            /* グリッドアイテムが中身に押し広げられないように（上記コメント参照）*/
+    padding: 2.2rem 1.3rem 4rem;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+  }
+  @media (min-width: 60rem) {
+    .doc { padding: 3rem 3rem 5rem; }
+  }
+  @media (max-width: 36rem) {
+    .doc { padding: 1.6rem 1.05rem 3rem; }
+  }
+
+  /* ========== 見出し ========== */
+  .doc h1, .doc h2, .doc h3, .doc h4, .doc h5, .doc h6 {
+    font-weight: 650;
+    line-height: 1.35;
+    margin: 2.2em 0 0.7em;
+    scroll-margin-top: calc(var(--topbar-h) + 0.8rem);   /* アンカー時にヘッダーバーの下に来る */
+  }
+  .doc > h1:first-child { margin-top: 0.2em; }
+  .doc h1 {
+    font-size: 1.95em;
+    letter-spacing: -0.01em;
+    padding-bottom: 0.32em;
+    border-bottom: 2.5px solid var(--accent-soft);
+  }
+  .doc h1::before {
+    content: "";
+    display: inline-block;
+    width: 0.78em;
+    height: 0.78em;
+    margin-right: 0.42em;
+    vertical-align: -0.02em;
+    background: var(--chip-svg) no-repeat center / contain;
+  }
+  .doc h2 {
+    font-size: 1.5em;
+    padding-bottom: 0.25em;
+    border-bottom: 1px solid var(--border);
+  }
+  .doc h3 { font-size: 1.22em; color: var(--accent-strong); }
+  .doc h4 { font-size: 1.06em; }
+  .doc h5, .doc h6 { font-size: 1em; color: var(--fg-soft); }
+  .doc h1 + p, .doc h2 + p, .doc h3 + p { margin-top: 0; }
+
+  /* ========== 段落・テキスト ========== */
+  .doc p { margin: 0.95em 0; }
+  .doc strong { font-weight: 680; color: var(--fg); }
+  .doc em { font-style: italic; }
+  .doc del, .doc s { color: var(--fg-faint); }
+  .doc small { color: var(--fg-soft); }
+  .doc sup, .doc sub { font-size: 0.72em; }
+
+  /* ========== リンク ========== */
+  .doc a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+  .doc a:hover { color: var(--accent-strong); border-bottom-color: currentColor; }
+
+  /* ========== リスト ========== */
+  .doc ul, .doc ol { margin: 0.9em 0; padding-left: 1.5em; }
+  .doc li { margin: 0.32em 0; }
+  .doc li > ul, .doc li > ol { margin: 0.3em 0; }
+  .doc ul { list-style: none; }
+  .doc ul > li { position: relative; }
+  .doc ul > li::before {
+    content: "";
+    position: absolute;
+    left: -1.05em;
+    top: 0.72em;
+    width: 0.4em;
+    height: 0.4em;
+    border-radius: 2px;
+    background: var(--accent-soft);
+    transform: rotate(45deg);
+  }
+  .doc ol { list-style: decimal; }
+  .doc ol > li::marker { color: var(--accent); font-weight: 600; }
+
+  /* task list（GFM — pandoc は <li><label><input type=checkbox>テキスト</label></li> 構造で出力）*/
+  .doc ul.task-list { padding-left: 1.5em; }
+  .doc ul.task-list > li { list-style: none; }
+  .doc ul.task-list > li::before { display: none; }
+  .doc ul.task-list li input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 1.05em; height: 1.05em;
+    margin: 0 0.5em 0 -1.65em;
+    vertical-align: -0.16em;
+    border: 1.6px solid var(--accent-soft);
+    border-radius: 5px;
+    background-color: var(--bg-soft);
+  }
+  .doc ul.task-list li input[type="checkbox"]:checked {
+    border-color: var(--accent);
+    background-color: var(--accent);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.4 8.6l3 3 6.2-7.2' fill='none' stroke='%23faf7f2' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 0.82em;
+  }
+
+  /* ========== インラインコード / コードブロック ========== */
+  .doc code {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+  }
+  .doc :not(pre) > code {
+    background: var(--bg-inset);
+    color: var(--accent-strong);
+    padding: 0.12em 0.4em;
+    border-radius: var(--radius-sm);
+    white-space: break-spaces;
+  }
+  .doc pre {
+    max-width: 100%;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1em 1.2em;
+    margin: 1.2em 0;
+    overflow-x: auto;
+    line-height: 1.6;
+    box-shadow: 0 1px 3px var(--shadow);
+  }
+  .doc pre code {
+    background: none;
+    color: var(--fg);
+    padding: 0;
+    font-size: 0.86em;
+    white-space: pre;
+  }
+  /* pandoc が（将来 highlight 有効化した場合に）出す skylighting ラッパへの保険 */
+  .doc div.sourceCode { margin: 1.2em 0; max-width: 100%; }
+  .doc div.sourceCode pre { margin: 0; }
+  .doc pre > code.sourceCode > span { display: inline-block; line-height: 1.6; }
+
+  /* ========== blockquote ========== */
+  .doc blockquote {
+    margin: 1.3em 0;
+    padding: 0.6em 1.2em;
+    border-left: 4px solid var(--accent);
+    background: var(--bg-soft);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    color: var(--fg-soft);
+  }
+  .doc blockquote > :first-child { margin-top: 0; }
+  .doc blockquote > :last-child { margin-bottom: 0; }
+  .doc blockquote blockquote {
+    margin: 0.7em 0;
+    border-left-color: var(--accent-soft);
+  }
+
+  /* ========== テーブル ========== */
+  .doc table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    max-width: 100%;
+    margin: 1.4em 0;
+    font-size: 0.94em;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: 0 1px 3px var(--shadow);
+  }
+  .doc thead th {
+    background: var(--bg-soft);
+    font-weight: 660;
+    text-align: left;
+    border-bottom: 2px solid var(--accent-soft);
+  }
+  .doc th, .doc td {
+    padding: 0.58em 0.9em;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .doc tbody tr:last-child td { border-bottom: none; }
+  .doc tbody tr:nth-child(even) { background: var(--bg-inset); }
+  .doc table code { font-size: 0.95em; }
+
+  /* ========== 区切り線・画像 ========== */
+  .doc hr {
+    border: none;
+    height: 1px;
+    margin: 2.4em 0;
+    background: linear-gradient(to right, transparent, var(--accent-soft), transparent);
+  }
+  .doc img, .doc svg { max-width: 100%; height: auto; }
+  .doc img { border-radius: var(--radius-sm); }
+  .doc figure { margin: 1.4em 0; }
+  .doc figcaption { font-size: 0.88em; color: var(--fg-faint); text-align: center; margin-top: 0.5em; }
+
+  /* ========== Mermaid ========== */
+  .doc pre.mermaid {
+    max-width: 100%;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.2em;
+    text-align: center;
+    overflow-x: auto;
+    box-shadow: 0 1px 3px var(--shadow);
+  }
+  .doc pre.mermaid.mermaid--failed {
+    white-space: pre-wrap;
+    text-align: left;
+    color: var(--fg-faint);
+    font-family: var(--font-mono);
+    font-size: 0.82em;
+  }
+
+  /* ========== ドキュメントヘッダ / フッタ ========== */
+  .doc__header { margin-bottom: 1.8em; }
+  .doc__title { margin-top: 0.2em; }
+  .doc__subtitle { color: var(--fg-soft); font-size: 1.15em; margin-top: -0.3em; }
+  .doc__author, .doc__date { color: var(--fg-faint); font-size: 0.92em; margin: 0.2em 0; }
+  .doc__footer {
+    margin-top: 3.5em;
+    padding-top: 1.4em;
+    border-top: 1px solid var(--border);
+    font-size: 0.86em;
+    color: var(--fg-faint);
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+  }
+  .doc__footer-mark {
+    font-weight: 650;
+    letter-spacing: 0.04em;
+    color: var(--accent);
+  }
+  .doc__footer-mark::before {
+    content: "";
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    margin-right: 0.32em;
+    vertical-align: -0.18em;
+    background: var(--chip-svg) no-repeat center / contain;
+  }
+
+  /* ========== 目次（<details>: デスクトップ=左ナビ常時展開、スマホ=折りたたみカード）========== */
+  .toc { min-width: 0; }
+  .toc__title {
+    margin: 0;
+    font-size: 0.95em;
+    font-weight: 660;
+    color: var(--accent);
+    cursor: pointer;
+    list-style: none;          /* デフォルトの開閉三角を消す */
+    user-select: none;
+  }
+  .toc__title::-webkit-details-marker { display: none; }
+  .toc__title::before {
+    content: "▸";
+    display: inline-block;
+    margin-right: 0.5em;
+    font-size: 0.8em;
+    transition: transform 0.15s ease;
+  }
+  .toc[open] > .toc__title::before { transform: rotate(90deg); }
+  .toc ul { list-style: none; margin: 0; padding-left: 0.85em; }
+  .toc__body > ul { padding-left: 0; }
+  .toc li { margin: 0.16em 0; line-height: 1.45; }
+  .toc li::before { display: none; }
+  .toc a {
+    color: var(--fg-soft);
+    border: none;
+    display: block;
+    padding: 0.06em 0;
+    overflow-wrap: anywhere;
+  }
+  .toc a:hover { color: var(--accent); border: none; }
+  .toc__body > ul > li > a { color: var(--fg); font-weight: 560; }
+
+  /* デスクトップ: 左ナビ（カード装飾なし、ヘッダーバー直下に sticky、本文と縦罫で区切る）*/
+  @media (min-width: 60rem) {
+    .toc {
+      position: sticky;
+      top: var(--topbar-h);
+      align-self: start;
+      border-right: 1px solid var(--border);
+      font-size: 0.85em;
+    }
+    .toc__title { padding: 1.4rem 1.3rem 0.6rem 1.5rem; }
+    .toc__body {
+      padding: 0 1rem 1.6rem 1.5rem;
+      max-height: calc(100vh - var(--topbar-h) - 3.2rem);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+  }
+  /* スマホ / タブレット: 折りたたみカード（タップで展開、展開しても画面を占有しすぎないようスクロール可）*/
+  @media (max-width: 59.99rem) {
+    .toc {
+      margin: 1.1rem 1.05rem 0;
+      background: var(--bg-soft);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 1px 3px var(--shadow);
+      font-size: 0.88em;
+    }
+    .toc__title { padding: 0.8em 1.15em; }
+    .toc__body { padding: 0 1.15em 1em; max-height: 50vh; overflow-y: auto; }
+  }
+
+  /* ========== レスポンシブ微調整 ========== */
+  @media (max-width: 48rem) {
+    /* 狭い画面: テーブルは画面幅に収める（横にはみ出さない・右が見切れない）。
+       列幅は均等割り、セル内テキストは折り返す。行は縦に伸びるが横スクロールは発生しない。 */
+    .doc table { table-layout: fixed; font-size: 0.82em; }
+    .doc th, .doc td { padding: 0.45em 0.55em; overflow-wrap: anywhere; }
+    .doc th, .doc td, .doc table code { word-break: break-word; }
+  }
+  @media (max-width: 36rem) {
+    body { font-size: 16px; line-height: 1.72; }
+    .doc h1 { font-size: 1.7em; }
+    .doc h2 { font-size: 1.35em; }
+    .doc pre { padding: 0.9em 1em; }
+  }
+
+  /* 印刷 */
+  @media print {
+    .topbar { display: none; }
+    .page { display: block; }
+    .toc { display: none; }
+    .doc { max-width: none; padding: 0; }
+    .doc pre, .doc table, .doc blockquote { box-shadow: none; }
+  }
+  </style>
+</head>
+<body>
+<header class="topbar">
+  <!-- チップくんアイコン: ジオメトリは aimirai-doc.css の --chip-svg と同一に保つ（こちらは currentColor 継承の inline 版）-->
+  <span class="topbar__brand"><svg class="chip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" aria-hidden="true"><path d="M9 3.5V1.6M15 3.5V1.6M9 20.5v1.9M15 20.5v1.9M3.5 9H1.6M3.5 15H1.6M20.5 9h1.9M20.5 15h1.9"/><rect x="3.5" y="3.5" width="17" height="17" rx="4.2"/><g fill="currentColor" stroke="none"><rect x="9.4" y="9.3" width="1.8" height="5.4" rx=".9"/><rect x="12.8" y="9.3" width="1.8" height="5.4" rx=".9"/></g></svg><span>AiMirai&nbsp;Labs</span></span>
+  <span class="topbar__sep" aria-hidden="true">/</span><span class="topbar__doc">2026-05-13-cto-rotation-phase1-aimirailabs.md</span>
+</header>
+<div class="page">
+<details class="toc" role="doc-toc">
+<summary class="toc__title">目次</summary>
+<div class="toc__body">
+<ul>
+<li><a
+href="#plan-cto-ローテーション-phase-1--aimirailabs-リポ側-詳細実装プラン"
+id="toc-plan-cto-ローテーション-phase-1--aimirailabs-リポ側-詳細実装プラン">Plan:
+CTO ローテーション Phase 1 — AiMiraiLabs リポ側 詳細実装プラン</a>
+<ul>
+<li><a href="#-メタ" id="toc--メタ">■ メタ</a></li>
+<li><a href="#-toc" id="toc--toc">■ TOC</a></li>
+<li><a href="#1-前提依存" id="toc-1-前提依存">1. 前提・依存</a>
+<ul>
+<li><a href="#11-既存ファイルの状態実測2026-05-13"
+id="toc-11-既存ファイルの状態実測2026-05-13">1.1
+既存ファイルの状態（実測、2026-05-13）</a></li>
+<li><a href="#12-spec-sweep-6-項目clauderulesworkflowmdへの影響"
+id="toc-12-spec-sweep-6-項目clauderulesworkflowmdへの影響">1.2 spec
+sweep 6 項目（<code>.claude/rules/workflow.md</code>）への影響</a></li>
+<li><a href="#13-親-plan-との対応関係"
+id="toc-13-親-plan-との対応関係">1.3 親 Plan との対応関係</a></li>
+</ul></li>
+<li><a href="#2-作業-1-agentsmd-をロール中立に書き直し"
+id="toc-2-作業-1-agentsmd-をロール中立に書き直し">2. 作業 1:
+<code>AGENTS.md</code> をロール中立に書き直し</a>
+<ul>
+<li><a href="#21-ゴール" id="toc-21-ゴール">2.1 ゴール</a></li>
+<li><a href="#22-出来上がりの目次target-50-行"
+id="toc-22-出来上がりの目次target-50-行">2.2 出来上がりの目次（target
+~50 行）</a></li>
+<li><a href="#23-移動先マッピングagentsmd--roles"
+id="toc-23-移動先マッピングagentsmd--roles">2.3
+移動先マッピング（AGENTS.md → roles/*）</a></li>
+<li><a href="#24-検算者bridge-botへの影響評価"
+id="toc-24-検算者bridge-botへの影響評価">2.4 検算者（bridge
+bot）への影響評価</a></li>
+<li><a href="#25-worker-への指示要点"
+id="toc-25-worker-への指示要点">2.5 worker への指示要点</a></li>
+</ul></li>
+<li><a href="#3-作業-2-rolesreviewmd-新規"
+id="toc-3-作業-2-rolesreviewmd-新規">3. 作業 2:
+<code>roles/review.md</code> 新規</a>
+<ul>
+<li><a href="#31-配置" id="toc-31-配置">3.1 配置</a></li>
+<li><a href="#32-目次" id="toc-32-目次">3.2 目次</a></li>
+<li><a href="#33-作成上の注意" id="toc-33-作成上の注意">3.3
+作成上の注意</a></li>
+</ul></li>
+<li><a href="#4-作業-3-rolesacting_ctomd-新規"
+id="toc-4-作業-3-rolesacting_ctomd-新規">4. 作業 3:
+<code>roles/acting_cto.md</code> 新規</a>
+<ul>
+<li><a href="#41-配置" id="toc-41-配置">4.1 配置</a></li>
+<li><a href="#42-設計原則親-plan-5" id="toc-42-設計原則親-plan-5">4.2
+設計原則（親 Plan §5）</a></li>
+<li><a href="#43-目次target-60-行" id="toc-43-目次target-60-行">4.3
+目次（target ~60 行）</a></li>
+<li><a href="#44-注意" id="toc-44-注意">4.4 注意</a></li>
+</ul></li>
+<li><a href="#5-作業-4-codexconfigtoml-に-hooks--mcp--settings-移植"
+id="toc-5-作業-4-codexconfigtoml-に-hooks--mcp--settings-移植">5. 作業
+4: <code>~/.codex/config.toml</code> に hooks / MCP / settings 移植</a>
+<ul>
+<li><a href="#51-現状" id="toc-51-現状">5.1 現状</a></li>
+<li><a href="#52-取扱方針" id="toc-52-取扱方針">5.2 取扱方針</a></li>
+<li><a href="#53-雛形ファイルの目次" id="toc-53-雛形ファイルの目次">5.3
+雛形ファイルの目次</a></li>
+<li><a
+href="#54-phase-1--phase-15-切り分けv2ちゃっぴー検算-reject-反映-2026-05-14"
+id="toc-54-phase-1--phase-15-切り分けv2ちゃっぴー検算-reject-反映-2026-05-14">5.4
+Phase 1 / Phase 1.5 切り分け（v2、ちゃっぴー検算 REJECT 反映
+2026-05-14）</a></li>
+</ul></li>
+<li><a href="#6-作業-5-scriptssystem-setupdecchan-launchersh-新規"
+id="toc-6-作業-5-scriptssystem-setupdecchan-launchersh-新規">6. 作業 5:
+<code>scripts/system-setup/decchan-launcher.sh</code> 新規</a>
+<ul>
+<li><a href="#61-配置" id="toc-61-配置">6.1 配置</a></li>
+<li><a href="#62-役割" id="toc-62-役割">6.2 役割</a></li>
+<li><a href="#63-シェルスクリプト骨子実装イメージworker-が肉付け"
+id="toc-63-シェルスクリプト骨子実装イメージworker-が肉付け">6.3
+シェルスクリプト骨子（実装イメージ、worker が肉付け）</a></li>
+<li><a href="#64-worker-への指示要点"
+id="toc-64-worker-への指示要点">6.4 worker への指示要点</a></li>
+<li><a href="#65-テスト方針" id="toc-65-テスト方針">6.5
+テスト方針</a></li>
+</ul></li>
+<li><a href="#7-作業-6-scriptscodex-review--scriptscodex-cto-新規"
+id="toc-7-作業-6-scriptscodex-review--scriptscodex-cto-新規">7. 作業 6:
+<code>scripts/codex-review</code> + <code>scripts/codex-cto</code>
+新規</a>
+<ul>
+<li><a href="#71-配置" id="toc-71-配置">7.1 配置</a></li>
+<li><a href="#72-役割" id="toc-72-役割">7.2 役割</a></li>
+<li><a href="#73-scriptscodex-review-骨子"
+id="toc-73-scriptscodex-review-骨子">7.3
+<code>scripts/codex-review</code> 骨子</a></li>
+<li><a href="#74-scriptscodex-cto-骨子"
+id="toc-74-scriptscodex-cto-骨子">7.4 <code>scripts/codex-cto</code>
+骨子</a></li>
+<li><a href="#75-worker-への指示要点"
+id="toc-75-worker-への指示要点">7.5 worker への指示要点</a></li>
+<li><a href="#76-テスト方針" id="toc-76-テスト方針">7.6
+テスト方針</a></li>
+</ul></li>
+<li><a href="#8-作業-7-claudemd--agentsmd-drift-警告-hook-新規"
+id="toc-8-作業-7-claudemd--agentsmd-drift-警告-hook-新規">8. 作業 7:
+CLAUDE.md ↔︎ AGENTS.md drift 警告 hook 新規</a>
+<ul>
+<li><a href="#81-ゴール" id="toc-81-ゴール">8.1 ゴール</a></li>
+<li><a href="#82-hook-仕様" id="toc-82-hook-仕様">8.2 hook 仕様</a></li>
+<li><a
+href="#83-ペア定義-yaml新規-scriptshooksclaude-agents-drift-pairsyaml"
+id="toc-83-ペア定義-yaml新規-scriptshooksclaude-agents-drift-pairsyaml">8.3
+ペア定義 YAML（新規
+<code>scripts/hooks/claude-agents-drift-pairs.yaml</code>）</a></li>
+<li><a href="#84-hook-bash-骨子scriptshooksclaude-agents-drift-warnsh"
+id="toc-84-hook-bash-骨子scriptshooksclaude-agents-drift-warnsh">8.4
+hook bash
+骨子（<code>scripts/hooks/claude-agents-drift-warn.sh</code>）</a></li>
+<li><a href="#85-hook-登録" id="toc-85-hook-登録">8.5 hook 登録</a></li>
+<li><a href="#86-spec-sweep-項目-6hook-一覧表記への波及"
+id="toc-86-spec-sweep-項目-6hook-一覧表記への波及">8.6 spec sweep 項目
+6（hook 一覧表記）への波及</a></li>
+<li><a href="#87-worker-への指示要点"
+id="toc-87-worker-への指示要点">8.7 worker への指示要点</a></li>
+<li><a href="#88-テスト方針" id="toc-88-テスト方針">8.8
+テスト方針</a></li>
+</ul></li>
+<li><a
+href="#9-作業-8-旧-decchan-takeover-checklistmd-の改題briefchangelogmagimd-cross-ref"
+id="toc-9-作業-8-旧-decchan-takeover-checklistmd-の改題briefchangelogmagimd-cross-ref">9.
+作業 8: 旧 <code>decchan-takeover-checklist.md</code>
+の改題・brief・CHANGELOG・<code>magi.md</code> cross-ref</a>
+<ul>
+<li><a href="#91-改題マッピング" id="toc-91-改題マッピング">9.1
+改題マッピング</a></li>
+<li><a href="#92-内容置換方針" id="toc-92-内容置換方針">9.2
+内容置換方針</a></li>
+<li><a href="#93-brief-新規target-40-行"
+id="toc-93-brief-新規target-40-行">9.3 brief 新規（target ~40
+行）</a></li>
+<li><a href="#94-改名改題による-cross-ref-更新全-grep"
+id="toc-94-改名改題による-cross-ref-更新全-grep">9.4 改名・改題による
+cross-ref 更新（全 grep）</a></li>
+<li><a href="#95-changelogmd-追記" id="toc-95-changelogmd-追記">9.5
+CHANGELOG.md 追記</a></li>
+<li><a href="#96-spec-brief-pairsyaml-更新"
+id="toc-96-spec-brief-pairsyaml-更新">9.6 spec-brief-pairs.yaml
+更新</a></li>
+<li><a href="#97-worker-への指示要点"
+id="toc-97-worker-への指示要点">9.7 worker への指示要点</a></li>
+</ul></li>
+<li><a href="#10-作業-9-approvalmd--delegationmd-に判断権限範囲明文化"
+id="toc-10-作業-9-approvalmd--delegationmd-に判断権限範囲明文化">10.
+作業 9: <code>approval.md</code> / <code>delegation.md</code>
+に判断権限範囲明文化</a>
+<ul>
+<li><a href="#101-配置先決定approvalmd-か-delegationmd-か"
+id="toc-101-配置先決定approvalmd-か-delegationmd-か">10.1
+配置先決定（approval.md か delegation.md か）</a></li>
+<li><a href="#102-追記内容target-25-行"
+id="toc-102-追記内容target-25-行">10.2 追記内容（target ~25
+行）</a></li>
+<li><a href="#103-worker-への指示要点"
+id="toc-103-worker-への指示要点">10.3 worker への指示要点</a></li>
+</ul></li>
+<li><a href="#11-テスト方針--完了条件チェックリスト"
+id="toc-11-テスト方針--完了条件チェックリスト">11. テスト方針 /
+完了条件チェックリスト</a>
+<ul>
+<li><a
+href="#111-本-plan-pr-の完了条件aimirailabs-リポ側成果物が揃って-commit-済まで"
+id="toc-111-本-plan-pr-の完了条件aimirailabs-リポ側成果物が揃って-commit-済まで">11.1
+本 Plan PR の完了条件（AiMiraiLabs リポ側成果物が揃って commit
+済まで）</a></li>
+<li><a href="#112-機械チェック" id="toc-112-機械チェック">11.2
+機械チェック</a></li>
+<li><a href="#113-end-to-end-テスト本-pr-範囲外"
+id="toc-113-end-to-end-テスト本-pr-範囲外">11.3 end-to-end テスト（本 PR
+範囲外）</a></li>
+</ul></li>
+<li><a href="#12-ロールバック手順--ハマりポイント"
+id="toc-12-ロールバック手順--ハマりポイント">12. ロールバック手順 /
+ハマりポイント</a>
+<ul>
+<li><a href="#121-ロールバック" id="toc-121-ロールバック">12.1
+ロールバック</a></li>
+<li><a href="#122-ハマりポイント" id="toc-122-ハマりポイント">12.2
+ハマりポイント</a></li>
+</ul></li>
+<li><a href="#13-spec-sweep-6-項目セルフチェックpush-前ルーチン"
+id="toc-13-spec-sweep-6-項目セルフチェックpush-前ルーチン">13. spec
+sweep 6 項目セルフチェック（push 前ルーチン）</a>
+<ul>
+<li><a href="#131-push-前ルーチン" id="toc-131-push-前ルーチン">13.1
+push 前ルーチン</a></li>
+</ul></li>
+<li><a href="#14-出典参照" id="toc-14-出典参照">14. 出典・参照</a>
+<ul>
+<li><a href="#141-親-plan--関連-pr" id="toc-141-親-plan--関連-pr">14.1
+親 Plan / 関連 PR</a></li>
+<li><a href="#142-行動ルール" id="toc-142-行動ルール">14.2
+行動ルール</a></li>
+<li><a href="#143-既存仕様書参照" id="toc-143-既存仕様書参照">14.3
+既存仕様書（参照）</a></li>
+<li><a href="#144-雛形-hook参考実装" id="toc-144-雛形-hook参考実装">14.4
+雛形 hook（参考実装）</a></li>
+<li><a href="#145-phase-1-範囲外別-pr--別-issue-起票"
+id="toc-145-phase-1-範囲外別-pr--別-issue-起票">14.5 Phase 1 範囲外（別
+PR / 別 Issue 起票）</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
+</details>
+<article class="doc">
+<h1
+id="plan-cto-ローテーション-phase-1--aimirailabs-リポ側-詳細実装プラン">Plan:
+CTO ローテーション Phase 1 — AiMiraiLabs リポ側 詳細実装プラン</h1>
+<p>作成日: 2026-05-13（session 56） 親 Plan:
+<code>docs/plans/2026-05-13-cto-rotation.md</code>（PR #600 merge 済）
+レベル: <strong>C 相当</strong>（8+ ファイル目安、worker
+実装は次セッション） スコープ: <strong>AiMiraiLabs
+リポ側のみ</strong>（bridge <code>telegram_bot.py</code>
+改修・<code>magi-routing.json</code> スキーマ拡張・監査ログ jsonl
+書き出し・watchdog routing-aware 化 は bridge リポ側で別 PR、本 Plan
+のスコープ外）</p>
+<h2 id="-メタ">■ メタ</h2>
+<ul>
+<li>親 Plan で確定済の Phase 1 スコープのうち、<strong>AiMiraiLabs
+リポ内で完結する作業 9 件</strong>を実装プランに落とす</li>
+<li>本 Plan は worker
+実装の指示書として機能する（=「どのファイルを何行目どう書き換えるか /
+新規ファイルの目次 / hook 入出力仕様 / テスト方針」まで含める）</li>
+<li><strong>検算経路</strong>: bot 並列 2 者ダウン中（でっくす 〜5/17 /
+ぐるぐる 環境バグ）→ CEO + ちゃっぴーレビュー + admin merge</li>
+<li><strong>Phase 1 非ブロッキング spike</strong>（Codex から Discord
+MCP / <code>codex app-server</code> usage / <code>ccusage</code>
+精度）は親 Plan 第 2 節「Phase 1
+完了条件」に従い<strong>本実装の完了条件に含めない</strong>、別 Issue
+で並走</li>
+<li><strong>Phase 1 完了条件のうち「切替動作する」系は bridge
+側変更が無いと検証不能</strong> → 本 Plan の完了条件は「AiMiraiLabs
+リポ側成果物が揃って commit 済」までを範囲とする（bridge PR
+と合流して初めて end-to-end が回る）</li>
+</ul>
+<h2 id="-toc">■ TOC</h2>
+<ol type="1">
+<li>前提・依存</li>
+<li>作業 1: <code>AGENTS.md</code> をロール中立に書き直し</li>
+<li>作業 2: <code>roles/review.md</code> 新規</li>
+<li>作業 3: <code>roles/acting_cto.md</code> 新規</li>
+<li>作業 4: <code>~/.codex/config.toml</code> に hooks / MCP / settings
+移植</li>
+<li>作業 5: <code>scripts/system-setup/decchan-launcher.sh</code>
+新規</li>
+<li>作業 6: <code>scripts/codex-review</code> +
+<code>scripts/codex-cto</code> 新規</li>
+<li>作業 7: CLAUDE.md ↔︎ AGENTS.md drift 警告 hook 新規</li>
+<li>作業 8: 旧 <code>decchan-takeover-checklist.md</code>
+の改題・brief・CHANGELOG・<code>magi.md</code> cross-ref</li>
+<li>作業 9: <code>approval.md</code> / <code>delegation.md</code>
+に「入れ替わり CTO の判断権限範囲」明文化</li>
+<li>テスト方針 / 完了条件チェックリスト</li>
+<li>ロールバック手順 / ハマりポイント</li>
+<li>spec sweep 6 項目セルフチェック</li>
+<li>出典・参照</li>
+</ol>
+<hr />
+<h2 id="1-前提依存">1. 前提・依存</h2>
+<h3 id="11-既存ファイルの状態実測2026-05-13">1.1
+既存ファイルの状態（実測、2026-05-13）</h3>
+<table>
+<thead>
+<tr>
+<th>パス</th>
+<th>行数</th>
+<th>役割</th>
+<th>本 Plan で触る範囲</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AGENTS.md</code></td>
+<td>93</td>
+<td>でっくす検算特化（人格 + 検算判定 + セキュリティ）</td>
+<td><strong>作業 1</strong> で中立化（土台に薄める）</td>
+</tr>
+<tr>
+<td><code>docs/systems/decchan-takeover-checklist.md</code></td>
+<td>134</td>
+<td>旧 PoC チェックリスト</td>
+<td><strong>作業 8</strong> で <code>cto-rotation-checklist.md</code>
+に改題 + 内容を <code>docs/plans/2026-05-13-cto-rotation.md</code>
+の恒久部分で全面置換</td>
+</tr>
+<tr>
+<td><code>docs/systems/decchan-takeover-checklist-brief.md</code></td>
+<td>39</td>
+<td>旧 brief</td>
+<td><strong>作業 8</strong> で
+<code>cto-rotation-checklist-brief.md</code> に改題 + 中身同期</td>
+</tr>
+<tr>
+<td><code>docs/systems/magi.md</code></td>
+<td>294</td>
+<td>MAGI 構成全体</td>
+<td><strong>作業 8</strong> で cross-ref（旧名 → 新名）更新</td>
+</tr>
+<tr>
+<td><code>docs/systems/magi-brief.md</code></td>
+<td>未確認</td>
+<td>magi.md の brief</td>
+<td>同上</td>
+</tr>
+<tr>
+<td><code>docs/systems/CHANGELOG.md</code></td>
+<td>大</td>
+<td>spec 改訂履歴 canonical</td>
+<td><strong>作業 8</strong> で本 PR の entry 追記</td>
+</tr>
+<tr>
+<td><code>.claude/rules/approval.md</code></td>
+<td>79</td>
+<td>承認境界</td>
+<td><strong>作業 9</strong> で「入れ替わり CTO
+の判断権限範囲」節を追記</td>
+</tr>
+<tr>
+<td><code>.claude/rules/delegation.md</code></td>
+<td>167</td>
+<td>委譲ルール</td>
+<td>同上候補（approval.md と二択、§9 で決定）</td>
+</tr>
+<tr>
+<td><code>.claude/settings.json</code></td>
+<td>大</td>
+<td>hook 登録</td>
+<td><strong>作業 7</strong> で drift hook 登録 1 行追加</td>
+</tr>
+<tr>
+<td><code>scripts/hooks/</code></td>
+<td>17 本（既存）+ <code>spec-brief-pairs.yaml</code></td>
+<td>hook 群</td>
+<td><strong>作業 7</strong> で 1 本新規追加</td>
+</tr>
+<tr>
+<td><code>~/.codex/config.toml</code></td>
+<td>9</td>
+<td>Codex 設定</td>
+<td><strong>作業 4</strong> で hooks / MCP / settings
+追記（ホーム外、リポ管理外。本 Plan では雛形 +
+適用手順のみ記述、実適用は手動 or launcher 経由）</td>
+</tr>
+<tr>
+<td><code>roles/</code></td>
+<td>不在</td>
+<td>—</td>
+<td><strong>作業 2 / 3</strong> で新規作成</td>
+</tr>
+</tbody>
+</table>
+<h3 id="12-spec-sweep-6-項目clauderulesworkflowmdへの影響">1.2 spec
+sweep 6 項目（<code>.claude/rules/workflow.md</code>）への影響</h3>
+<p>本 PR は以下を touch するため、spec sweep の項目が複数発火する:</p>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>発火</th>
+<th>対応</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>① brief 同期</td>
+<td>〇（<code>decchan-takeover-checklist*.md</code> → 改題で
+<code>cto-rotation-checklist*.md</code>、both touch）</td>
+<td>作業 8 で旧ペア削除 + 新ペア追加（hook が
+<code>spec-brief-pairs.yaml</code> 経由で判定。新名の brief も同 PR 内で
+touch 必須）</td>
+</tr>
+<tr>
+<td>② CHANGELOG.md sweep</td>
+<td>〇（<code>docs/systems/*.md</code> を touch するため）</td>
+<td>作業 8 で <code>## cto-rotation-checklist.md</code> セクション新設 +
+entry 追加</td>
+</tr>
+<tr>
+<td>③ cross-ref renumber</td>
+<td>〇（節番号変わりはしないが旧名→新名の link 更新が必要）</td>
+<td>作業 8 で全 grep + 更新</td>
+</tr>
+<tr>
+<td>④ 数字 claim drift</td>
+<td>△（active list 等の hook 本数 表記）</td>
+<td>作業 7 で drift hook 1 本追加 → 本数表記が出てくる箇所を grep
+して同期</td>
+</tr>
+<tr>
+<td>⑤ 索引・active list drift</td>
+<td>〇（<code>CLAUDE.md</code> 索引 + <code>tasks/todo.md</code> Up Next
+/ Done）</td>
+<td><strong>本 Plan では <code>tasks/todo.md</code>
+は触らない</strong>（並列セッション衝突防止、本 Plan
+冒頭の絶対禁止条項）→
+並列メインセッションが追記する形で運用する。<code>CLAUDE.md</code>
+側索引は <code>cto-rotation-checklist.md</code>
+言及があれば差し替え</td>
+</tr>
+<tr>
+<td>⑥ 関連 hook 一覧表記</td>
+<td>〇（drift hook 追加で <code>code-security.md §6</code> 表 + brief
+bullet の hook 本数 表記）</td>
+<td>作業 7 で同期</td>
+</tr>
+</tbody>
+</table>
+<h3 id="13-親-plan-との対応関係">1.3 親 Plan との対応関係</h3>
+<p>親 Plan <code>docs/plans/2026-05-13-cto-rotation.md</code> 「Phase 1
+スコープ」13 項目のうち、本 Plan が扱うのは:</p>
+<table>
+<thead>
+<tr>
+<th>親 Plan 項目</th>
+<th>本 Plan 作業</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AGENTS.md</code> をロール中立に書き直し</td>
+<td>§2（作業 1）</td>
+</tr>
+<tr>
+<td><code>roles/review.md</code> / <code>roles/acting_cto.md</code>
+新規</td>
+<td>§3 / §4（作業 2 / 3）</td>
+</tr>
+<tr>
+<td><code>~/.codex/config.toml</code> に hooks / MCP / settings
+移植</td>
+<td>§5（作業 4）</td>
+</tr>
+<tr>
+<td><code>decchan-launcher.sh</code> 新規</td>
+<td>§6（作業 5）</td>
+</tr>
+<tr>
+<td><code>scripts/codex-review</code> / <code>scripts/codex-cto</code>
+新規</td>
+<td>§7（作業 6）</td>
+</tr>
+<tr>
+<td>CLAUDE.md ↔︎ AGENTS.md / rules ↔︎ roles の drift 警告 hook 新規</td>
+<td>§8（作業 7）</td>
+</tr>
+<tr>
+<td>旧 checklist の改題・brief・CHANGELOG・<code>magi.md</code>
+cross-ref</td>
+<td>§9（作業 8）</td>
+</tr>
+<tr>
+<td><code>approval.md</code> or <code>delegation.md</code>
+に判断権限範囲明文化</td>
+<td>§10（作業 9）</td>
+</tr>
+</tbody>
+</table>
+<p>bridge リポ側（<code>telegram_bot.py</code> 抽象化 /
+<code>magi-routing.json</code> スキーマ拡張 / 監査ログ jsonl / watchdog
+routing-aware / <code>HANDOFF_DECCHAN.md</code> 運用）は<strong>本 Plan
+のスコープ外</strong>、bridge PR で別途扱う。</p>
+<hr />
+<h2 id="2-作業-1-agentsmd-をロール中立に書き直し">2. 作業 1:
+<code>AGENTS.md</code> をロール中立に書き直し</h2>
+<h3 id="21-ゴール">2.1 ゴール</h3>
+<p>現状の <code>AGENTS.md</code>（93 行、でっくす検算特化）から
+<strong>検算詳細を <code>roles/review.md</code>
+に分離</strong>し、<code>AGENTS.md</code> は「お前は誰か + 3
+モード（議論 / 検算 / CTO）+
+どのモードかは起動時に指示される」だけの<strong>薄い土台</strong>にする。</p>
+<h3 id="22-出来上がりの目次target-50-行">2.2 出来上がりの目次（target
+~50 行）</h3>
+<pre><code># AGENTS.md — でっくすちゃん（OpenAI Codex）人格設定（ロール中立）
+
+## ■ お前は誰か
+（コードちゃん CLAUDE.md と同型: 名前・組織・CEO・口調）
+
+## ■ 3 モード（起動時に指示される）
+- 議論モード: Discord で補足観点を出す。対立禁止。
+- 検算モード: 詳細は roles/review.md。bridge bot が `codex exec` で 1-shot spawn する経路。
+- CTO モード（入れ替わり）: 詳細は roles/acting_cto.md。`decchan-launcher.sh` 経由で tmux 起動された時。
+
+どのモードで動くかは起動時 prompt / 環境変数で指示される。
+モード未指定で起動された場合は議論モード扱いにせよ（最も影響範囲が小さい）。
+
+## ■ Core Principles
+- Simplicity First / No Laziness / Minimal Impact
+
+## ■ セキュリティ絶対ルール（全モード共通）
+（既存 §セキュリティ絶対ルール の必読リスト + 即 REJECT 条件を維持、ただし「検算判定」文言は roles/review.md に逃がす）
+
+## ■ 知識の鮮度
+（既存維持、全モード共通）
+
+## ■ プロジェクト詳細はコードちゃんに聞け
+（既存維持、参照を CLAUDE.md + .claude/rules/* に拡張）</code></pre>
+<h3 id="23-移動先マッピングagentsmd--roles">2.3
+移動先マッピング（AGENTS.md → roles/*）</h3>
+<table>
+<thead>
+<tr>
+<th>旧 <code>AGENTS.md</code> 行（現行 93 行版）</th>
+<th>移動先</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>L6-15 「お前は誰か」+ 口調</td>
+<td><code>AGENTS.md</code> 残置（中立化）</td>
+</tr>
+<tr>
+<td>L17-21 「役割」（議論 / PR 検算 / 代打）</td>
+<td><code>AGENTS.md</code> の「3 モード」節に圧縮、各モードの詳細は
+<code>roles/review.md</code> / <code>roles/acting_cto.md</code>
+に逃がす</td>
+</tr>
+<tr>
+<td>L23-33 「PR 検算 3 段階判定」</td>
+<td><code>roles/review.md</code> に移動</td>
+</tr>
+<tr>
+<td>L35-44 「検算姿勢」</td>
+<td><code>roles/review.md</code> に移動</td>
+</tr>
+<tr>
+<td>L46-49 「検算手順の恒久ルール」</td>
+<td><code>roles/review.md</code> に移動</td>
+</tr>
+<tr>
+<td>L51-59 「検算入力・出力フォーマット」</td>
+<td><code>roles/review.md</code> に移動</td>
+</tr>
+<tr>
+<td>L61-85 「セキュリティ絶対ルール」（基本 + 詳細仕様表）</td>
+<td><code>AGENTS.md</code> 残置（全モード共通）</td>
+</tr>
+<tr>
+<td>L87-89 「知識の鮮度」</td>
+<td><code>AGENTS.md</code> 残置</td>
+</tr>
+<tr>
+<td>L91-93 「プロジェクト詳細はコードちゃんに聞け」</td>
+<td><code>AGENTS.md</code> 残置（参照先を CLAUDE.md +
+<code>.claude/rules/*</code> に拡張）</td>
+</tr>
+</tbody>
+</table>
+<h3 id="24-検算者bridge-botへの影響評価">2.4 検算者（bridge
+bot）への影響評価</h3>
+<ul>
+<li>現状: bot が PR 検算で <code>codex exec</code> を呼ぶ時、Codex CLI
+は cwd の <code>AGENTS.md</code> を自動ロードする（OpenAI Codex
+の慣習）。検算判定文言が <code>AGENTS.md</code>
+から消えると検算が壊れる懸念</li>
+<li>対策: <strong>bridge 側の検算 prompt 内で
+<code>roles/review.md</code> を physical Read させる</strong>（bridge
+<code>run_codex_exec_structured()</code> の prompt に「最初に
+<code>roles/review.md</code> を Read しろ」を追加）→ bridge PR
+とのジョイント。bridge 側に依存があるため、本 PR merge 後即座に bridge
+側で対応必須</li>
+<li><strong>過渡期の安全策（本 PR 範囲）</strong>:
+<code>AGENTS.md</code> の「3 モード」節に
+<strong>検算モード時の必須参照ファイル =
+<code>roles/review.md</code></strong> を太字で明記し、Codex
+が「検算プロンプトを受け取ったら roles/review.md
+を読む」と判断できるようにする。bridge 側未対応の状態でも Codex
+自身の判断で読みに行ける建付</li>
+</ul>
+<h3 id="25-worker-への指示要点">2.5 worker への指示要点</h3>
+<ul>
+<li>「お前は誰か」「セキュリティ絶対ルール」「知識の鮮度」「プロジェクト詳細はコードちゃんに聞け」は<strong>1
+字 1 句残す</strong>（既存検算経路の依存）</li>
+<li>削除した検算文言と完全同一のテキストを <code>roles/review.md</code>
+に移すこと（文言ドリフトすると検算判定軸が変わる）</li>
+<li>行末改行・空行・コードブロック記法は保存</li>
+</ul>
+<hr />
+<h2 id="3-作業-2-rolesreviewmd-新規">3. 作業 2:
+<code>roles/review.md</code> 新規</h2>
+<h3 id="31-配置">3.1 配置</h3>
+<p><code>/home/aimiral/AiMiraiLabs/roles/review.md</code>（<code>roles/</code>
+ディレクトリ新規）</p>
+<h3 id="32-目次">3.2 目次</h3>
+<pre><code># roles/review.md — でっくす検算モードのロール定義
+
+このファイルは「でっくすが PR 検算モードで起動された時の詳細ルール」を集約する。
+通常運用では bridge bot が `codex exec` で 1-shot spawn する時に prompt 内で本ファイルを Read させる。
+CTO（コードちゃん）が `codex:codex-rescue` agent で 1-shot 検算を依頼する時も同じ。
+
+## ■ PR 検算 3 段階判定
+（AGENTS.md L23-33 を物理移動）
+
+## ■ 検算姿勢（CEO 確定 2026-05-10）
+（AGENTS.md L35-44 を物理移動、ただし workflow.md §5 sweep / 車輪の再発明チェック は最新版を反映）
+
+## ■ 検算手順の恒久ルール
+（AGENTS.md L46-49 を物理移動）
+
+## ■ 検算入力・出力フォーマット（固定）
+（AGENTS.md L51-59 を物理移動）
+
+## ■ 関連
+- 入れ替わり中の検算: bridge bot が「実装者 = でっくす（CTO）」モード時はベリちゃん + ぐるぐる に検算を切替（`docs/systems/magi.md §ベリちゃん検算`）。本ファイルの「検算者 = でっくす」前提は通常運用時のみ</code></pre>
+<h3 id="33-作成上の注意">3.3 作成上の注意</h3>
+<ul>
+<li>内容は <strong>AGENTS.md からの物理移動</strong>
+が原則。新規追記は禁止（検算判定軸を Plan PR
+で変えると検算と実装の責任分離原則違反、<code>AGENTS.md §検算姿勢</code>
+の「判定基準を書き換えるな」）</li>
+<li>ファイル冒頭に「このファイルは AGENTS.md
+から分離された検算詳細です」と由来を明記</li>
+</ul>
+<hr />
+<h2 id="4-作業-3-rolesacting_ctomd-新規">4. 作業 3:
+<code>roles/acting_cto.md</code> 新規</h2>
+<h3 id="41-配置">4.1 配置</h3>
+<p><code>/home/aimiral/AiMiraiLabs/roles/acting_cto.md</code></p>
+<h3 id="42-設計原則親-plan-5">4.2 設計原則（親 Plan §5）</h3>
+<ul>
+<li><strong>権限境界・禁止事項・承認必須操作は再列挙しない、参照のみ</strong>（CEO
+確定 2026-05-13、親 Plan §5）</li>
+<li>書くのは「Codex 固有の運用差分」だけ</li>
+</ul>
+<h3 id="43-目次target-60-行">4.3 目次（target ~60 行）</h3>
+<pre><code># roles/acting_cto.md — でっくす CTO ローテーション（入れ替わり）時のロール定義
+
+このファイルは「でっくすが CTO ローテーションで暫定 CTO に切り替わった時の Codex 固有の振る舞い」を書く。
+権限境界・禁止事項・承認必須操作は既存 rule / hook に従う（再列挙しない、§権限境界 参照）。
+
+## ■ 起動時に必ず読むファイル（順序）
+1. `.claude/rules/workflow.md` / `delegation.md` / `approval.md` / `security.md` / `session-flow.md`（CTO 共通の行動ルール）
+2. `docs/systems/magi.md`（MAGI 構成 + ベリちゃん検算）
+3. `docs/systems/cto-rotation-checklist.md`（この体制の仕様、作業 8 で改題）
+4. `HANDOFF.md` + `tasks/todo.md` + `git log --oneline -20` + `gh pr list`（現状把握）
+5. 監査ログ `~/.magi/cto-rotation-audit.jsonl` に「CTO ローテーション開始」を記録
+6. #一般（Discord）で CEO に挨拶（bridge 経由 or Discord MCP、後者は spike）
+
+## ■ 権限境界
+権限境界・禁止事項・承認必須操作は、既存の `.claude/rules/{approval,delegation,security}.md` および hook 強制（`approval-gate.sh` / `main-push-block.sh` / `secrets-read-block.sh` 等）に従う。
+本 role file ではそれらを再定義しない。
+特に「お金 / 外部 API 契約・変更 / ユーザーデータ削除 / 本番構成変更」の 4 カテゴリは絶対聞け。
+**入れ替わり中だからといって判断権限が拡大することは無い**（むしろ Phase 1 では保守寄り、§9 で明文化）。
+
+## ■ Codex 固有の運用差分
+
+### Agent tool が無い
+Claude Code の `Agent` tool は Codex CLI に存在しない。worker 委譲は `codex exec` 多段で代替する:
+- 平常時（コードちゃん CTO）の worker = `claude -p` Sonnet（`.claude/agents/worker.md` 参照）
+- 入れ替わり時（でっくす CTO）の worker = **`codex exec` 子プロセス**（Codex の $100 予算で実装。**`claude -p` Sonnet worker は呼ぶな** ── 温存中の Claude 3 割はベリちゃん検算専用、親 Plan §「入れ替わり中の検算経路」）
+
+### tmux 運用
+- でっくすの tmux session は `decchan-launcher.sh` が起動する（自分で `tmux new-session` するな、botちゃんが管理）
+- 復帰前（戻り）に `HANDOFF_DECCHAN.md`（リポ root）に「やったこと / 未解決 / 直近 CEO 指示 / 作業ブランチ」を書け
+- 監査ログ `~/.magi/cto-rotation-audit.jsonl` に重要判断（PR merge / escalation / 切替）を append しろ（フォーマットは親 Plan §4）
+
+### Discord 窓口
+- routing=codex の間、#一般 のメッセは bridge 経由ででっくすに流れる
+- でっくすから Discord に投稿する経路は (A) bridge 経由（推奨、確立済） / (B) Codex 直接 Discord MCP（spike 中、繋がれば使う）
+- routing=claude の時は #一般 に CTO として返答するな（bridge 側 routing 判定で機械担保される、`scripts/hooks/magi-routing-block.sh`）
+
+### tasks/todo.md / tasks/lessons.md
+- AI のメモ代わり、随時更新 OK、CHANGELOG / brief 不要、commit は溜めて handoff PR で push
+- canonical = `tasks/todo.md`（HANDOFF.md は snapshot）
+
+### モデル / reasoning effort
+- CTO 業務は 1-shot 検算より深い思考が要る → `model_reasoning_effort = &quot;high&quot;` 以上で起動する（`decchan-launcher.sh` が指定、§6 参照）
+- 起動モデルは `gpt-5.5` か `gpt-5.5-codex`（Codex 特化）── 親 Plan の spike 結論で確定
+
+## ■ 戻り（コードちゃんへの返却）
+- CEO が「戻れ」（または `!codechan`）を発したら、即座に `HANDOFF_DECCHAN.md` を最終 commit &amp; push
+- `tmux` を自分で kill しようとするな（botちゃんが kill + コードちゃん tmux 起動を仕切る）</code></pre>
+<h3 id="44-注意">4.4 注意</h3>
+<ul>
+<li>bridge / botちゃん側で <code>decchan-launcher.sh</code> 経由起動時に
+<code>roles/acting_cto.md</code> を Read 注入する設計（§6
+参照）。本ファイル単体では auto-load 機構を持たないため、launcher
+経由の起動が前提</li>
+</ul>
+<hr />
+<h2 id="5-作業-4-codexconfigtoml-に-hooks--mcp--settings-移植">5. 作業
+4: <code>~/.codex/config.toml</code> に hooks / MCP / settings 移植</h2>
+<h3 id="51-現状">5.1 現状</h3>
+<p><code>~/.codex/config.toml</code>（9 行）:</p>
+<pre class="toml"><code>personality = &quot;pragmatic&quot;
+[mcp_servers.discord]
+command = &quot;/home/aimiral/AiMiraiLabs/scripts/system-setup/mcp-config/discord-mcp-wrapper.sh&quot;
+
+[projects.&quot;/home/aimiral/AiMiraiLabs&quot;]
+trust_level = &quot;trusted&quot;
+
+[sandbox_workspace_write]
+network_access = true</code></pre>
+<h3 id="52-取扱方針">5.2 取扱方針</h3>
+<p><code>~/.codex/config.toml</code>
+は<strong>リポ管理外</strong>（ホームディレクトリ）。本 PR では:</p>
+<ol type="1">
+<li>リポ内に<strong>雛形ファイル</strong>
+<code>scripts/system-setup/codex-config.toml.template</code>
+を新規作成（管理対象、レビュー対象）</li>
+<li>適用手順を <code>docs/systems/cto-rotation-checklist.md</code>（作業
+8 で確定する本体）に記載</li>
+<li>実適用（テンプレート → <code>~/.codex/config.toml</code>
+への反映）は CEO 確認後、手動 or <code>decchan-launcher.sh</code>
+起動時に diff check</li>
+</ol>
+<p>理由: ホーム外のファイルを PR 内で直接書き換えると検算でき・rollback
+でき・auto-merge できない。テンプレート + 適用手順方式が
+<code>magi.md §secrets 受け渡しルール</code> と同じ筋。</p>
+<h3 id="53-雛形ファイルの目次">5.3 雛形ファイルの目次</h3>
+<p><code>scripts/system-setup/codex-config.toml.template</code>:</p>
+<pre class="toml"><code># Codex CLI 設定テンプレート（~/.codex/config.toml への適用前提）
+# 適用方法: docs/systems/cto-rotation-checklist.md §適用手順 参照
+# 機械 diff: scripts/system-setup/codex-config-diff.sh で実機との差分確認（任意、Phase 2）
+
+personality = &quot;pragmatic&quot;
+
+# === モデル / reasoning ===
+# CTO 入れ替わり時は decchan-launcher.sh が -c model_reasoning_effort=high で上書きするため、
+# ここはデフォルト（検算 1-shot 用、低 effort）に合わせる
+# model = &quot;gpt-5.5&quot;  # 起動時 --model で指定する派ならコメントアウト可
+
+# === Trust / Sandbox ===
+[projects.&quot;/home/aimiral/AiMiraiLabs&quot;]
+trust_level = &quot;trusted&quot;
+
+[sandbox_workspace_write]
+network_access = true
+
+# === MCP ===
+[mcp_servers.discord]
+command = &quot;/home/aimiral/AiMiraiLabs/scripts/system-setup/mcp-config/discord-mcp-wrapper.sh&quot;
+# 注: Phase 1 spike 結果が「Codex から繋がらない」なら本ブロックを削除して bridge 経由に統一
+
+# === Hooks（Codex CLI v0.124.0+、PreToolUse / pre_compact / post_compact）===
+# Phase 1 で移植する hooks（17 本中、Codex で意味をなすもの ── 親 Plan §「うちのデータの共有可否インベントリ §Hooks」表）:
+# - secrets-read-block.sh（Read/Bash で credentials.env 読み出しブロック）
+# - approval-gate.sh（絶対聞け 4 カテゴリ headless ブロック + CEO 通知）
+# - main-push-block.sh（main 直 push/commit ブロック）
+# - gh-public-block.sh / gh-pr-create-check.sh / no-verify-block.sh / handoff-broken-ref-block.sh
+# - spec-brief-sync-block.sh / boy-scout-warn.sh / check-hook-list-drift.sh / changelog-sync-warn.sh
+# - precompact-snapshot.sh（Codex の pre_compact / post_compact 相当に wrap）
+# - stop-worktree-warn.sh（Codex の Stop 相当に wrap、Stop hook の有無は要確認）
+#
+# Codex hooks の入力 JSON 形式は Claude Code と異なる → bash 本体は流用、薄い wrapper を介す
+# wrapper = scripts/system-setup/codex-hook-wrapper.sh（Phase 1 で実装、危険 4 カテゴリ block を含む最小構成）
+[hooks]
+# Phase 1 で動作させる最小構成（危険 4 カテゴリ = お金 / 外部 API 契約 / ユーザーデータ削除 / 本番構成変更 を block）:
+pre_tool_use = &quot;/home/aimiral/AiMiraiLabs/scripts/system-setup/codex-hook-wrapper.sh approval-gate&quot;
+# Phase 1.5 で追加 wrap する hook 例（残り 13 本、本 PR では未配線）:
+# pre_tool_use = &quot;/home/aimiral/AiMiraiLabs/scripts/system-setup/codex-hook-wrapper.sh secrets-read-block&quot;
+# pre_tool_use = &quot;/home/aimiral/AiMiraiLabs/scripts/system-setup/codex-hook-wrapper.sh main-push-block&quot;
+# pre_compact = &quot;/home/aimiral/AiMiraiLabs/scripts/system-setup/codex-hook-wrapper.sh precompact-snapshot&quot;</code></pre>
+<h3
+id="54-phase-1--phase-15-切り分けv2ちゃっぴー検算-reject-反映-2026-05-14">5.4
+Phase 1 / Phase 1.5 切り分け（v2、ちゃっぴー検算 REJECT 反映
+2026-05-14）</h3>
+<ul>
+<li><strong>Phase 1（本 PR スコープ）</strong>:
+<ul>
+<li>雛形ファイル新規 + 適用手順記載</li>
+<li><code>scripts/system-setup/codex-hook-wrapper.sh</code> 実装（Codex
+hooks 入力 JSON 形式を Claude Code 用 hook bash 本体に橋渡し）</li>
+<li><strong>危険 4 カテゴリ（お金 / 外部 API 契約・変更 /
+ユーザーデータ削除 / 本番環境構成変更）の PreToolUse block を実装 + 実機
+codex 起動で動作確認</strong>（=
+<code>.claude/rules/approval.md</code>「🚫 絶対聞け」相当を Codex 側でも
+block）</li>
+<li>該当する block 実装方針 = 既存
+<code>scripts/hooks/approval-gate.sh</code> 相当の機能を Codex wrapper
+経由で動かす（Claude Code 側の env ガード
+<code>MAGI_APPROVAL_GATE=1</code> 相当を Codex 側でも実現、もしくは
+Codex 側で常時有効化）</li>
+</ul></li>
+<li><strong>Phase 1.5（別 Issue 起票）</strong>: 残り 13 本（17 - 4）の
+hook を順次 wrap + 動作確認、precompact / boy-scout / spec-brief-sync
+等。spec sweep 系・brief
+同期系・コンパクション系などの便利系（安全性へのインパクトが軽い）はここで追加移植</li>
+</ul>
+<p><strong>理由</strong>（v2 で変更）: 危険 4 カテゴリ block
+は<strong>入れ替わり CTO
+の承認境界を守る安全要件</strong>（<code>.claude/rules/approval.md</code>「🚫
+絶対聞け」）であり、Phase 1 試作スコープでも譲れない。hook
+なしで動かすと「絶対聞け」操作（本番構成変更・課金・ユーザーデータ削除・外部
+API 契約等）が CEO 通知なしで通る → Phase 1
+完了条件「現在状態を読ませた上で判断・指揮・ログ保存まで<strong>最低限</strong>できる」の「最低限」に<strong>安全要件が含まれる</strong>との解釈に修正（v1
+では「hook なしでも CTO
+業務は回る」と判断していたが、これは安全要件を完了条件から切り離した誤った切分け、ちゃっぴー検算
+REJECT で指摘）。残り 13 本（便利系）は安全性インパクトが軽いので Phase
+1.5 に送って分割。</p>
+<hr />
+<h2 id="6-作業-5-scriptssystem-setupdecchan-launchersh-新規">6. 作業 5:
+<code>scripts/system-setup/decchan-launcher.sh</code> 新規</h2>
+<h3 id="61-配置">6.1 配置</h3>
+<p><code>/home/aimiral/AiMiraiLabs/scripts/system-setup/decchan-launcher.sh</code>（実行権限
+0755）</p>
+<h3 id="62-役割">6.2 役割</h3>
+<p>botちゃん（bridge）が「CTO
+ローテーション開始」を検知した時、本スクリプトを実行して codex を tmux
+session 内で起動する。</p>
+<ul>
+<li>workdir を <code>/home/aimiral/AiMiraiLabs</code> に固定</li>
+<li>必要な ENV を allowlist で
+export（<code>security.md §worker env allowlist</code> 参照、credentials
+全量 export 禁止）</li>
+<li><code>roles/acting_cto.md</code> + 起動 prompt
+を<strong>起動時に注入</strong>（最初のメッセージとして送る）</li>
+<li><code>tmux new-session -d -s decchan</code> で daemon 起動（kill は
+botちゃん責任）</li>
+</ul>
+<h3 id="63-シェルスクリプト骨子実装イメージworker-が肉付け">6.3
+シェルスクリプト骨子（実装イメージ、worker が肉付け）</h3>
+<pre class="bash"><code>#!/usr/bin/env bash
+# decchan-launcher.sh — CTO ローテーション時の codex tmux 起動
+# 呼び出し元: bridge bot（CTO ローテーション開始時）/ CEO 手動（緊急時）
+# Phase 1 では tmux 起動 + role/prompt 注入まで。usage 自動検知は Phase 2
+
+set -euo pipefail
+
+WORKDIR=&quot;/home/aimiral/AiMiraiLabs&quot;
+SESSION=&quot;decchan&quot;
+ROLE_FILE=&quot;$WORKDIR/roles/acting_cto.md&quot;
+ROUTING_FILE=&quot;$HOME/.claude/magi-routing.json&quot;
+AUDIT_LOG=&quot;$HOME/.magi/cto-rotation-audit.jsonl&quot;
+
+# 既存セッション残骸チェック
+if tmux has-session -t &quot;$SESSION&quot; 2&gt;/dev/null; then
+    echo &quot;[decchan-launcher] session &#39;$SESSION&#39; already exists, aborting&quot; &gt;&amp;2
+    exit 1
+fi
+
+# ENV allowlist（credentials 全量は export しない）
+allowed_env=(
+    HOME USER PATH LANG LC_ALL TERM
+    # 必要に応じて: ANTHROPIC_API_KEY（ベリちゃん検算経路で使う場合のみ、要レビュー）
+)
+env_args=()
+for k in &quot;${allowed_env[@]}&quot;; do
+    [[ -n &quot;${!k:-}&quot; ]] &amp;&amp; env_args+=(&quot;-e&quot; &quot;$k=${!k}&quot;)
+done
+
+# 起動 prompt 組み立て（親 Plan §6 テンプレ準拠）
+prompt=$(cat &lt;&lt;&#39;EOF&#39;
+お前は今、AiMirai Labs MAGI システムの暫定 CTO（CTO ローテーション）や。
+コードちゃん（Claude）が usage 制限 / CEO の手動切替で交代した。
+
+最初にやること:
+1. roles/acting_cto.md を読め（お前の CTO としての振る舞い・禁止事項）
+2. .claude/rules/*.md（workflow / delegation / approval / security / session-flow）= CTO 共通の行動ルール
+3. docs/systems/magi.md（MAGI 構成）/ docs/systems/cto-rotation-checklist.md（この体制の仕様）
+4. 現状把握: HANDOFF.md + tasks/todo.md + `git log --oneline -20` + `gh pr list` を読め
+5. 監査ログ ~/.magi/cto-rotation-audit.jsonl に「CTO ローテーション開始」を記録しろ
+6. #一般（Discord）で CEO に「でっくすが CTO 代わったで」と挨拶しろ（bridge 経由 or Discord MCP）
+
+復帰時: コードちゃん復帰前に HANDOFF_DECCHAN.md を書け（やったこと・未解決・直近 CEO 指示・作業ブランチ）。
+EOF
+)
+
+# 起動コマンド（reasoning effort = high、approval = never で headless 動作）
+# 注: --model / --effort の flag 名は Codex CLI 実機で確認（v0.130.0 系で揺れる可能性あり）
+cd &quot;$WORKDIR&quot;
+tmux new-session -d -s &quot;$SESSION&quot; \
+    &quot;codex \
+        -c model_reasoning_effort=high \
+        --approval-policy never \
+        --sandbox workspace-write \
+        &#39;$prompt&#39;&quot;
+
+# 監査ログ
+mkdir -p &quot;$(dirname &quot;$AUDIT_LOG&quot;)&quot;
+printf &#39;{&quot;timestamp&quot;:&quot;%s&quot;,&quot;actor&quot;:&quot;watchdog&quot;,&quot;mode&quot;:&quot;acting_cto&quot;,&quot;event&quot;:&quot;launch&quot;,&quot;summary&quot;:&quot;decchan tmux launched&quot;,&quot;result&quot;:&quot;success&quot;}\n&#39; \
+    &quot;$(date -Iseconds)&quot; &gt;&gt; &quot;$AUDIT_LOG&quot;
+
+echo &quot;[decchan-launcher] tmux session &#39;$SESSION&#39; launched&quot;</code></pre>
+<h3 id="64-worker-への指示要点">6.4 worker への指示要点</h3>
+<ul>
+<li><code>tmux</code> flag
+は実機で要確認（<code>tmux new-session -d -s NAME 'CMD'</code> の
+<code>CMD</code> が長文 prompt の場合のエスケープに注意 ── shell quote
+経由でなく heredoc + <code>tmux send-keys</code>
+で送る方式も検討、worker が実機 spike）</li>
+<li><code>codex</code> の <code>--approval-policy</code> /
+<code>-c model_reasoning_effort=high</code> / <code>--sandbox</code>
+の正確な flag 名は <code>codex --help</code> で確認</li>
+<li>ENV allowlist は <code>security.md §worker env allowlist</code>
+を遵守、credentials.env を全量 export しない</li>
+<li>監査ログ jsonl のフォーマットは親 Plan §4
+と完全一致（<code>actor</code> / <code>mode</code> / <code>event</code>
+/ <code>result</code> / <code>summary</code> / <code>timestamp</code>
+ISO 8601 JST）</li>
+<li>ファイル冒頭の <code>set -euo pipefail</code> 必須</li>
+<li>既存セッション残骸（<code>has-session</code>）チェック + abort
+で多重起動防止</li>
+<li><strong>本スクリプト自体は magi-routing.json
+を書き換えない</strong>（bridge bot 側の責務 ── atomic write +
+<code>previous</code> / <code>mode</code> / <code>lock</code>
+フィールド管理、親 Plan §3）</li>
+</ul>
+<h3 id="65-テスト方針">6.5 テスト方針</h3>
+<table>
+<thead>
+<tr>
+<th>ケース</th>
+<th>手順</th>
+<th>期待結果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>正常起動</td>
+<td><code>bash decchan-launcher.sh</code></td>
+<td><code>tmux has-session -t decchan</code> が
+true、<code>~/.magi/cto-rotation-audit.jsonl</code> に launch entry</td>
+</tr>
+<tr>
+<td>多重起動</td>
+<td>起動済み状態で再実行</td>
+<td>stderr に warn、exit 1</td>
+</tr>
+<tr>
+<td>ENV scrub</td>
+<td>`env</td>
+<td>grep -E 'SECRET</td>
+</tr>
+<tr>
+<td>codex 起動失敗</td>
+<td>codex バイナリ削除（mock）</td>
+<td>exit 非 0、tmux session 作らない</td>
+</tr>
+</tbody>
+</table>
+<p>実機テストは bridge PR と合流後（end-to-end）。本 PR では code review
++ dry-run（<code>bash -n</code>）まで。</p>
+<hr />
+<h2 id="7-作業-6-scriptscodex-review--scriptscodex-cto-新規">7. 作業 6:
+<code>scripts/codex-review</code> + <code>scripts/codex-cto</code>
+新規</h2>
+<h3 id="71-配置">7.1 配置</h3>
+<ul>
+<li><code>/home/aimiral/AiMiraiLabs/scripts/codex-review</code>（実行権限
+0755）</li>
+<li><code>/home/aimiral/AiMiraiLabs/scripts/codex-cto</code>（実行権限
+0755）</li>
+</ul>
+<h3 id="72-役割">7.2 役割</h3>
+<p>profile 注入ラッパー。CEO / CTO（コードちゃん）が手動で「検算モード
+codex を 1 発呼びたい」「CTO モード codex
+を起動したい」時に使う薄いショートカット。</p>
+<h3 id="73-scriptscodex-review-骨子">7.3
+<code>scripts/codex-review</code> 骨子</h3>
+<pre class="bash"><code>#!/usr/bin/env bash
+# codex-review — でっくす検算モードのワンショット起動ラッパー
+# 用途: CTO（コードちゃん）が PR を 1-shot で でっくすに検算させる
+# 使い方: scripts/codex-review &lt;PR番号 or ファイルパス&gt;
+
+set -euo pipefail
+
+WORKDIR=&quot;/home/aimiral/AiMiraiLabs&quot;
+ROLE_FILE=&quot;$WORKDIR/roles/review.md&quot;
+
+target=&quot;${1:-}&quot;
+if [[ -z &quot;$target&quot; ]]; then
+    echo &quot;Usage: $0 &lt;PR番号 or ファイルパス&gt;&quot; &gt;&amp;2
+    exit 1
+fi
+
+# review prompt = roles/review.md + 検算対象の diff
+diff_content=&quot;&quot;
+if [[ &quot;$target&quot; =~ ^[0-9]+$ ]]; then
+    diff_content=$(gh pr diff &quot;$target&quot; 2&gt;/dev/null) || {
+        echo &quot;[codex-review] gh pr diff $target 失敗&quot; &gt;&amp;2; exit 1
+    }
+else
+    diff_content=$(cat &quot;$target&quot;)
+fi
+
+prompt=$(cat &lt;&lt;EOF
+お前は検算モードで起動された。最初に必ず以下を読め:
+- $ROLE_FILE（検算 3 段階判定 + 検算姿勢 + 入出力フォーマット）
+- AGENTS.md（人格 + セキュリティ絶対ルール）
+
+検算対象:
+$diff_content
+
+判定 (PERFECT / MINOR / REJECT) と根拠を出力フォーマットに従って出せ。
+EOF
+)
+
+cd &quot;$WORKDIR&quot;
+codex exec -p &quot;$prompt&quot;</code></pre>
+<h3 id="74-scriptscodex-cto-骨子">7.4 <code>scripts/codex-cto</code>
+骨子</h3>
+<pre class="bash"><code>#!/usr/bin/env bash
+# codex-cto — でっくす CTO モードのワンショット起動ラッパー（緊急時の手動切替用）
+# 用途: bridge bot 経由ではなく CEO が直接手動切替したい時
+# 通常運用は decchan-launcher.sh 経由（bridge bot 管理）を推奨
+# 使い方: scripts/codex-cto [追加 prompt]
+
+set -euo pipefail
+exec /home/aimiral/AiMiraiLabs/scripts/system-setup/decchan-launcher.sh &quot;$@&quot;</code></pre>
+<h3 id="75-worker-への指示要点">7.5 worker への指示要点</h3>
+<ul>
+<li>両スクリプトとも先頭に <code>set -euo pipefail</code> 必須</li>
+<li><code>gh pr diff</code> 失敗時の fail loud（exit 1 + stderr
+に理由）</li>
+<li><code>codex exec</code> の正確な flag は実機で確認（<code>-p</code>
+/ <code>--prompt</code> 等の揺れ）</li>
+<li><code>codex-cto</code> は <strong>decchan-launcher.sh
+のシン薄ラッパー</strong>で済ます（重複ロジック禁止）</li>
+<li>両方とも <code>--help</code> 対応（usage 表示）</li>
+</ul>
+<h3 id="76-テスト方針">7.6 テスト方針</h3>
+<p><code>bash -n</code> syntax check + 引数なしで usage 出力確認 + mock
+環境での dry-run。codex-review / codex-cto スクリプト本体の実機 codex
+呼び出しテスト（実際の PR 検算ループ / CTO ループの実行確認）は Phase
+1.5 で。<strong>ただし §5.4 の Phase 1 完了条件「危険 4 カテゴリ
+PreToolUse block 動作確認」は実機 codex 起動 + block 試行 + 拒否確認まで
+Phase 1 で実施</strong>（hook 配線の動作実証、launcher
+起動経路の最小確認も兼ねる）。</p>
+<hr />
+<h2 id="8-作業-7-claudemd--agentsmd-drift-警告-hook-新規">8. 作業 7:
+CLAUDE.md ↔︎ AGENTS.md drift 警告 hook 新規</h2>
+<h3 id="81-ゴール">8.1 ゴール</h3>
+<p><code>.claude/rules/*.md</code> / <code>CLAUDE.md</code>（CTO
+共通の中立ソース）を編集したのに <code>AGENTS.md</code> /
+<code>roles/*.md</code>（Codex 側エントリ）を同 PR で touch
+していなかったら <strong>stderr 警告</strong>（warn-only、block
+しない）。</p>
+<p>親 Plan §「drift 同期 hook（軽い版を採用）」+ workflow.md「spec
+更新時 sweep 6 項目」項目 6 と同じ系統。</p>
+<h3 id="82-hook-仕様">8.2 hook 仕様</h3>
+<table>
+<thead>
+<tr>
+<th>項目</th>
+<th>値</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ファイル名</td>
+<td><code>scripts/hooks/claude-agents-drift-warn.sh</code></td>
+</tr>
+<tr>
+<td>種別</td>
+<td>PreToolUse hook、Bash matcher</td>
+</tr>
+<tr>
+<td>発動</td>
+<td><code>git push</code> サブコマンド検出時のみ（既存
+<code>changelog-sync-warn.sh</code> と同じパターン）</td>
+</tr>
+<tr>
+<td>動作</td>
+<td>warn-only（exit 0、stderr に警告のみ）</td>
+</tr>
+<tr>
+<td>入力 JSON</td>
+<td>Claude Code 標準（<code>tool_name</code>,
+<code>tool_input.command</code>, <code>tool_input.cwd</code>）</td>
+</tr>
+<tr>
+<td>設定ファイル</td>
+<td><code>scripts/hooks/claude-agents-drift-pairs.yaml</code>（新規）</td>
+</tr>
+</tbody>
+</table>
+<h3
+id="83-ペア定義-yaml新規-scriptshooksclaude-agents-drift-pairsyaml">8.3
+ペア定義 YAML（新規
+<code>scripts/hooks/claude-agents-drift-pairs.yaml</code>）</h3>
+<pre class="yaml"><code># claude-agents-drift-pairs.yaml — CLAUDE.md ↔ AGENTS.md drift hook 設定
+# Phase 1 PR で新規（CTO ローテーション体制の brief）
+#
+# pairs: 編集を検知したら相手側も同 PR 内で touch されているか確認する組み合わせ
+# 双方向に検査（claude 側を編集したら agents 側を、agents 側を編集したら claude 側を）
+
+pairs:
+  - claude:
+      - CLAUDE.md
+      - .claude/rules/workflow.md
+      - .claude/rules/delegation.md
+      - .claude/rules/approval.md
+      - .claude/rules/security.md
+      - .claude/rules/session-flow.md
+    agents:
+      - AGENTS.md
+      - roles/review.md
+      - roles/acting_cto.md
+    note: |
+      コードちゃん側の人格 / 行動ルール（CLAUDE.md + .claude/rules/*）を編集したら、
+      でっくす側の対応ロールファイル（AGENTS.md + roles/*.md）も同 PR で touch すること。
+      drift すると入れ替わり時に CTO 行動軸がズレる。
+      意図的に片側のみ更新する場合は警告を無視可（warn-only、block しない）。
+
+# 除外: テスト用 / 履歴のみのファイル等（必要に応じて追記）
+excluded: []</code></pre>
+<h3 id="84-hook-bash-骨子scriptshooksclaude-agents-drift-warnsh">8.4
+hook bash
+骨子（<code>scripts/hooks/claude-agents-drift-warn.sh</code>）</h3>
+<p>設計骨子（既存 <code>changelog-sync-warn.sh</code>
+の構造を踏襲、warn-only + fail-open）:</p>
+<pre class="bash"><code>#!/usr/bin/env bash
+# claude-agents-drift-warn.sh — PreToolUse hook（warn のみ、block しない）
+#
+# git push 時、push 範囲（origin/main..HEAD）の diff に CLAUDE.md / .claude/rules/*.md（claude 側）
+# が含まれているのに対応する AGENTS.md / roles/*.md（agents 側）が同 push 内で未 touch、
+# または逆向きの drift が起きていたら stderr へ warn 出力。
+#
+# 親 Plan: docs/plans/2026-05-13-cto-rotation.md §「drift 同期 hook（軽い版を採用）」
+# 設計: fail-open（set -e なし、warn hook のバグで push が止まる方が困る）
+#       origin/main 不在は判定不能 → exit 0
+
+set -uo pipefail
+
+input=$(cat)
+tool_name=$(printf &#39;%s&#39; &quot;$input&quot; | jq -r &#39;.tool_name // empty&#39;)
+[[ &quot;$tool_name&quot; != &quot;Bash&quot; ]] &amp;&amp; exit 0
+
+cmd=$(printf &#39;%s&#39; &quot;$input&quot; | jq -r &#39;.tool_input.command // empty&#39;)
+[[ -z &quot;$cmd&quot; ]] &amp;&amp; exit 0
+
+# git push 検出
+if [[ ! &quot;$cmd&quot; =~ (^|[[:space:];&amp;|])git[[:space:]]+push([[:space:]]|$) ]]; then
+    exit 0
+fi
+
+cwd=$(printf &#39;%s&#39; &quot;$input&quot; | jq -r &#39;.tool_input.cwd // empty&#39;)
+[[ -z &quot;$cwd&quot; ]] &amp;&amp; cwd=$(pwd)
+
+repo_root=$(git -C &quot;$cwd&quot; rev-parse --show-toplevel 2&gt;/dev/null || true)
+[[ -z &quot;$repo_root&quot; ]] &amp;&amp; exit 0
+
+git -C &quot;$repo_root&quot; rev-parse --verify origin/main &gt;/dev/null 2&gt;&amp;1 || exit 0
+
+config=&quot;$repo_root/scripts/hooks/claude-agents-drift-pairs.yaml&quot;
+[[ -f &quot;$config&quot; ]] || exit 0
+
+# YAML pairs parse（最小: yq があれば使う、なければ awk で読む）
+# 実装は worker に委ねる。pairs[0].claude / pairs[0].agents の list を array に取り込む。
+
+mapfile -t changed &lt; &lt;(git -C &quot;$repo_root&quot; diff --name-only origin/main..HEAD 2&gt;/dev/null)
+[[ ${#changed[@]} -eq 0 ]] &amp;&amp; exit 0
+
+# 以下、検出ロジック:
+# 1. claude 側 list のいずれかが changed に含まれているか
+# 2. 含まれているなら agents 側 list のいずれかも含まれているか
+# 3. 双方向: agents 側が含まれていて claude 側が含まれていないケースも warn
+
+# 結果を warnings 配列に積む
+# warnings が空でなければ stderr に出力（changelog-sync-warn.sh と同じ書式）
+
+exit 0</code></pre>
+<h3 id="85-hook-登録">8.5 hook 登録</h3>
+<p><code>.claude/settings.json</code> の
+<code>PreToolUse[matcher="Bash"]</code> 配列に 1 行追加:</p>
+<pre class="json"><code>{
+  &quot;type&quot;: &quot;command&quot;,
+  &quot;command&quot;: &quot;/home/aimiral/AiMiraiLabs/scripts/hooks/claude-agents-drift-warn.sh&quot;
+}</code></pre>
+<p>挿入位置: <code>changelog-sync-warn.sh</code> の直下（warn
+系をまとめる）。</p>
+<h3 id="86-spec-sweep-項目-6hook-一覧表記への波及">8.6 spec sweep 項目
+6（hook 一覧表記）への波及</h3>
+<p>新規 hook 追加で以下も touch:</p>
+<ul>
+<li><code>docs/systems/code-security.md §6</code> の hook
+一覧表に行追加（hook 名・matcher・役割・block/warn 区分）</li>
+<li><code>docs/systems/code-security-brief.md</code> §6 bullet に hook
+本数 + 名前列挙の同期</li>
+<li>関連: <code>check-hook-list-drift.sh</code> が
+<code>scripts/hooks/*.sh</code> を grep して照合するので、本 PR 内で
+<code>code-security.md</code> 同期しないと warn が出る（warn-only なので
+push 自体は通るが MINOR 指摘 root）</li>
+</ul>
+<h3 id="87-worker-への指示要点">8.7 worker への指示要点</h3>
+<ul>
+<li><code>changelog-sync-warn.sh</code> を雛形として骨格を真似る（git
+push 検出 / cwd 抽出 / origin/main 判定 / fail-open 設計）</li>
+<li>YAML パースは既存 <code>spec-brief-sync-block.sh</code> の awk
+パターンを参考に（yq 依存は避ける、CI 環境差異リスク）</li>
+<li>warn-only なので exit 2 ではなく exit 0、ただし warnings があれば
+stderr に書く</li>
+<li>警告文には「意図的に片側のみ更新の場合は無視可（warn-only）」を明記</li>
+<li>テスト用シナリオ（後述）が pass することを確認</li>
+</ul>
+<h3 id="88-テスト方針">8.8 テスト方針</h3>
+<table>
+<thead>
+<tr>
+<th>ケース</th>
+<th>git push 範囲</th>
+<th>期待結果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>双方 touch</td>
+<td><code>CLAUDE.md</code> + <code>AGENTS.md</code></td>
+<td>warn なし</td>
+</tr>
+<tr>
+<td>claude 側のみ</td>
+<td><code>CLAUDE.md</code> のみ</td>
+<td>warn（「AGENTS.md / roles/*.md 同 PR 未 touch」）</td>
+</tr>
+<tr>
+<td>agents 側のみ</td>
+<td><code>AGENTS.md</code> のみ</td>
+<td>warn（逆向き）</td>
+</tr>
+<tr>
+<td>関係ない</td>
+<td><code>apps/education/...</code> のみ</td>
+<td>warn なし</td>
+</tr>
+<tr>
+<td>origin/main 不在</td>
+<td>fresh clone</td>
+<td>exit 0、warn なし（fail-open）</td>
+</tr>
+<tr>
+<td>git push 以外</td>
+<td><code>git status</code></td>
+<td>exit 0 即時</td>
+</tr>
+</tbody>
+</table>
+<p><code>scripts/hooks/tests/</code> 配下に既存テスト harness
+があれば追従、なければ worker が単体 bash script で smoke test
+用意。</p>
+<hr />
+<h2
+id="9-作業-8-旧-decchan-takeover-checklistmd-の改題briefchangelogmagimd-cross-ref">9.
+作業 8: 旧 <code>decchan-takeover-checklist.md</code>
+の改題・brief・CHANGELOG・<code>magi.md</code> cross-ref</h2>
+<h3 id="91-改題マッピング">9.1 改題マッピング</h3>
+<table>
+<thead>
+<tr>
+<th>旧</th>
+<th>新</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>docs/systems/decchan-takeover-checklist.md</code></td>
+<td><code>docs/systems/cto-rotation-checklist.md</code></td>
+</tr>
+<tr>
+<td><code>docs/systems/decchan-takeover-checklist-brief.md</code></td>
+<td><code>docs/systems/cto-rotation-checklist-brief.md</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="92-内容置換方針">9.2 内容置換方針</h3>
+<p>旧ファイルは <strong>「でっくす単独引受け」前提の PoC
+チェックリスト</strong>（134 行）。新名
+<code>cto-rotation-checklist.md</code> は <strong>CTO
+ローテーション（コードちゃん ⇄ でっくす 2 者ローテ、<span
+class="math inline">100/</span>100 予算分割前提）</strong> が
+canonical。</p>
+<p>→ <strong>親 Plan <code>docs/plans/2026-05-13-cto-rotation.md</code>
+の「恒久部分」を本体に昇格</strong>:</p>
+<ul>
+<li>§「目的・基本方針」「ローテーション roster
+と役割分担」「切替トリガー」「切替メカニズム」「入れ替わり中の検算経路」「ファイル構造」「watchdog
+routing-aware 化」「bridge 抽象化」「Discord / Telegram 窓口」「usage
+可視化」「引継ぎ・状態・監査」「移行ツールの扱い」「共有可否インベントリ」「Phase
+1 スコープ / Phase 2 / 不採用」「実装ブループリント詳細」「現状」「関連
+Issue / PR」</li>
+<li>Plan ファイル側はそのまま履歴として <code>docs/plans/</code>
+配下に残す（親 Plan §冒頭の方針通り）</li>
+</ul>
+<h3 id="93-brief-新規target-40-行">9.3 brief 新規（target ~40 行）</h3>
+<p><code>docs/systems/cto-rotation-checklist-brief.md</code> 目次:</p>
+<pre><code># cto-rotation-checklist-brief.md — CTO ローテーション体制（索引集）
+
+短縮版（cheatsheet）。詳細は cto-rotation-checklist.md。
+
+## ■ 目的
+コードちゃん（Claude Opus）⇄ でっくす（Codex GPT-5.5）の CTO ローテーション体制。
+$100/$100 予算分割前提、平常運転のローテーション（「代打」ではなく「ローテーション」）。
+
+## ■ ローテ対象
+- ローテ対象: コードちゃん / でっくす（2 者のみ）
+- ローテ外: ぐるぐる（CKO/検算補佐）、ベリちゃん（監査・自動代打）
+- 両方枯渇 → CEO 待ち
+
+## ■ 切替トリガー
+- 行き: コードちゃん usage 7割 → CEO 提案 → 承認 → tmux 入れ替え（手動「交代!」/ !decchan も可）
+- 戻り: CEO「戻れ」/ !codechan で復帰
+- Phase 1 は Discord 経由手動のみ、自動フェイルオーバーは Phase 2
+
+## ■ 切替メカニズム
+tmux ごと入れ替え（kill + launcher 起動）、botちゃんが仕切る。
+
+## ■ 入れ替わり中の検算
+ベリちゃん（Claude 残3割）+ ぐるぐる。worker は codex exec の子プロセス（Claude 予算保護）。
+
+## ■ ファイル構造
+- 中立ソース: .claude/rules/*.md + docs/systems/magi.md
+- Claude 側: ~/CLAUDE.md + AiMiraiLabs/CLAUDE.md
+- Codex 側: AGENTS.md（薄い土台）+ roles/review.md（検算）+ roles/acting_cto.md（CTO ロール）
+- Codex 設定: ~/.codex/config.toml（hooks/MCP/settings 移植、雛形は scripts/system-setup/codex-config.toml.template）
+
+## ■ drift 警告
+claude 側（CLAUDE.md / .claude/rules/*）↔ agents 側（AGENTS.md / roles/*）の同 PR drift は
+scripts/hooks/claude-agents-drift-warn.sh が stderr 警告（warn-only）。
+
+## ■ Phase 1 完了条件
+詳細は cto-rotation-checklist.md §「実装ブループリント詳細 §2 Phase 1 完了条件」。
+- 入れ替わり: !decchan で routing=codex + decchan tmux 起動 + でっくすが acting_cto.md 認識 + HANDOFF/todo/log/PR 読み + #一般 流入 + ロールバック動作
+- 戻り: !codechan で routing=claude + decchan kill + codechan 復帰 + HANDOFF_DECCHAN.md 残存
+- 安全要件: codex-hook-wrapper.sh 経由で危険 4 カテゴリ PreToolUse block が動作（approval-gate 相当、実機 codex 起動 + block 試行 + 拒否確認）
+
+## ■ Phase 2
+usage 自動検知 / 自動フェイルオーバー / ベリちゃん事後監査 / drift 同期重い版（コードジェネレータ）。
+
+詳細は cto-rotation-checklist.md を Read しろ。@import は禁止。</code></pre>
+<h3 id="94-改名改題による-cross-ref-更新全-grep">9.4 改名・改題による
+cross-ref 更新（全 grep）</h3>
+<p>旧名 <code>decchan-takeover-checklist</code> を全 grep し置換:</p>
+<pre class="bash"><code>grep -rln &#39;decchan-takeover-checklist&#39; \
+  AiMiraiLabs/CLAUDE.md ~/CLAUDE.md \
+  docs/systems/ .claude/rules/ apps/*/docs/ \
+  AGENTS.md</code></pre>
+<p>判明している touch 候補:</p>
+<table>
+<thead>
+<tr>
+<th>ファイル</th>
+<th>行</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>docs/systems/magi.md</code></td>
+<td>L292（<code>代打 CTO モード切替は ... 詳細は docs/systems/decchan-takeover-checklist.md 参照</code>）</td>
+<td><code>cto-rotation-checklist.md</code> に書き換え</td>
+</tr>
+<tr>
+<td><code>docs/systems/magi-brief.md</code></td>
+<td>該当行（要 grep）</td>
+<td>同</td>
+</tr>
+<tr>
+<td>親 Plan <code>docs/plans/2026-05-13-cto-rotation.md</code></td>
+<td>複数（旧名言及）</td>
+<td>履歴 doc のため<strong>そのまま残す</strong>（plan
+は時点スナップショット、書き換え不要）</td>
+</tr>
+<tr>
+<td><code>tasks/todo.md</code></td>
+<td>該当行</td>
+<td><strong>本 Plan では touch
+しない</strong>（並列セッション衝突防止、冒頭の絶対禁止条項）。並列メインセッションが追記する</td>
+</tr>
+</tbody>
+</table>
+<h3 id="95-changelogmd-追記">9.5 CHANGELOG.md 追記</h3>
+<p><code>docs/systems/CHANGELOG.md</code> に新セクション + entry
+追加:</p>
+<p>挿入位置: 既存のアルファベット順 or
+既存セクションの並びに合わせる（要 head 確認）。</p>
+<p>追加内容:</p>
+<pre class="markdown"><code>## cto-rotation-checklist.md
+
+- 2026-05-13 (PR #XXX): 新規（旧 decchan-takeover-checklist.md を改題・全面改訂、CTO ローテーション体制 canonical）。親 Plan = docs/plans/2026-05-13-cto-rotation.md（PR #600）の恒久部分を本体に昇格
+
+## decchan-takeover-checklist.md（廃止）
+
+- 2026-05-13 (PR #XXX): cto-rotation-checklist.md に改題して廃止</code></pre>
+<p>旧セクション <code>## decchan-takeover-checklist.md</code>
+が既存にあれば<strong>残してマーカーだけ追記</strong>（履歴は破壊しない）、無ければ「廃止」セクションも書かない（要
+head 確認）。</p>
+<h3 id="96-spec-brief-pairsyaml-更新">9.6 spec-brief-pairs.yaml
+更新</h3>
+<p><code>scripts/hooks/spec-brief-pairs.yaml</code> の
+<code>excluded:</code>
+リストに旧名が含まれていないか確認。含まれていなければ無変更（新名
+<code>cto-rotation-checklist.md</code> ↔︎
+<code>cto-rotation-checklist-brief.md</code> は pair で OK、新規追加で同
+PR 内 both touch のため hook block されない）。</p>
+<h3 id="97-worker-への指示要点">9.7 worker への指示要点</h3>
+<ul>
+<li>改題は <code>git mv</code> で実施（履歴保持）</li>
+<li>中身は親 Plan <code>docs/plans/2026-05-13-cto-rotation.md</code>
+の恒久部分（§目的〜§関連
+Issue/PR）を<strong>コピーして本体化</strong>、ただし冒頭の「メタ（レベル
+C / 検算経路 / 次セッション）」節は plan
+メタなので削除し、本体らしい目次に書き換え</li>
+<li>brief は §9.3 の目次案を 40 行以内で書ききる</li>
+<li>cross-ref 更新は grep → sed で機械的に。<strong>目視で当該 commit
+に含まれる diff を全行確認</strong>（spec sweep ③）</li>
+</ul>
+<hr />
+<h2 id="10-作業-9-approvalmd--delegationmd-に判断権限範囲明文化">10.
+作業 9: <code>approval.md</code> / <code>delegation.md</code>
+に判断権限範囲明文化</h2>
+<h3 id="101-配置先決定approvalmd-か-delegationmd-か">10.1
+配置先決定（approval.md か delegation.md か）</h3>
+<p>判定: <strong><code>approval.md</code> に追記</strong>。</p>
+<p>理由:</p>
+<ul>
+<li>「入れ替わり CTO の判断権限範囲」は権限境界の話（承認境界 3
+段階の延長）→ <code>approval.md</code> の方が自然</li>
+<li><code>delegation.md</code> は委譲・worker spawn 関連が中心、CTO
+自身の権限境界は対象外</li>
+</ul>
+<h3 id="102-追記内容target-25-行">10.2 追記内容（target ~25 行）</h3>
+<p><code>approval.md</code> の「## Plan PR bot 並列検算 APPROVE で CEO
+再承認なし」の下、「## ExitPlanMode 承認待ち時 Discord
+通知必須」の前に新規節を挿入:</p>
+<pre class="markdown"><code>---
+
+## 入れ替わり CTO（CTO ローテーション）の判断権限範囲（CEO 確定 2026-05-13）
+
+CTO ローテーションでコードちゃん ⇄ でっくす が入れ替わった時、入れ替わり中の CTO（でっくす）は
+**コードちゃん CTO と同じ承認境界に従う**（権限が拡大することは無い）。
+
+### 同じ範囲（コードちゃん CTO と同等）
+
+- ✅ 勝手にやれ: バグ修正・デプロイ・テスト・軽微なコード改善
+- ⚠️ 提案上げろ: 新機能追加・設計変更・大規模 refactor
+- 🚫 絶対聞け: お金・外部 API 契約・ユーザーデータ削除・本番構成変更
+
+### 追加の制約（入れ替わり中の保守寄り運用、Phase 1）
+
+- **新規 spec（`docs/systems/*.md`）の新設は CEO 確認必須**（既存 spec の sweep/追記は通常範囲）
+- **`.claude/rules/*.md` の編集は CEO 確認必須**（行動ルール変更は両 CTO の合意領域、独断不可）
+- **CLAUDE.md / AGENTS.md / roles/*.md の人格・ロール変更は CEO 確認必須**（drift 警告 hook で機械検知される）
+- **`magi-routing.json` の手動編集禁止**（bridge bot が atomic write で管理、`!decchan` / `!codechan` 経由のみ）
+- **Phase 2 までは usage 自動フェイルオーバー無し**（CEO 手動切替のみ、入れ替わり CTO が「もうしんどい、戻して」と提案するのは OK）
+
+### 機械強制
+
+- `approval-gate.sh` hook（既存）= 「絶対聞け」4 カテゴリを headless ブロック + CEO Telegram 通知
+- `main-push-block.sh` hook（既存）= main 直 push/commit ブロック
+- `claude-agents-drift-warn.sh` hook（本 PR で新規）= claude 側 ↔ agents 側 drift を warn-only で検知
+- **Phase 1 完了条件**: Codex CLI 側の hook wrapper（`scripts/system-setup/codex-hook-wrapper.sh`）+ `codex-config.toml.template` の危険 4 カテゴリ PreToolUse block 配線 + 実機 codex 起動による block 動作確認まで実装（`approval-gate.sh` 相当を Codex 側でも block する状態）。残り 13 本（17 - 4）の便利系 hook 移植は **Phase 1.5**
+
+### 復帰時の責務
+
+- コードちゃん復帰前に `HANDOFF_DECCHAN.md`（リポ root）に「やったこと / 未解決 / 直近 CEO 指示 / 作業ブランチ」を書く
+- 監査ログ `~/.magi/cto-rotation-audit.jsonl` に重要判断（PR merge / escalation / 切替）を append</code></pre>
+<h3 id="103-worker-への指示要点">10.3 worker への指示要点</h3>
+<ul>
+<li>既存節との間の <code>---</code> セパレータを保つ（approval.md
+既存スタイル）</li>
+<li>「同じ範囲」「追加の制約」「機械強制」「復帰時の責務」の 4
+ブロック構成を維持</li>
+<li>hook 名は <code>scripts/hooks/</code>
+配下の実ファイル名と完全一致させる</li>
+<li>数字 claim（Phase 1 / Phase 1.5 / Phase
+2）は明細リスト併記（workflow.md §quantitative claim ルール）</li>
+</ul>
+<hr />
+<h2 id="11-テスト方針--完了条件チェックリスト">11. テスト方針 /
+完了条件チェックリスト</h2>
+<h3
+id="111-本-plan-pr-の完了条件aimirailabs-リポ側成果物が揃って-commit-済まで">11.1
+本 Plan PR の完了条件（AiMiraiLabs リポ側成果物が揃って commit
+済まで）</h3>
+<ul class="task-list">
+<li><label><input type="checkbox" /><code>AGENTS.md</code>
+がロール中立化されている（93 行 → ~50 行、検算文言が
+<code>roles/review.md</code> に移動）</label></li>
+<li><label><input type="checkbox" /><code>roles/review.md</code>
+新規（AGENTS.md からの物理移動、新規追記なし）</label></li>
+<li><label><input type="checkbox" /><code>roles/acting_cto.md</code>
+新規（target ~60 行、権限境界は再列挙せず参照のみ）</label></li>
+<li><label><input
+type="checkbox" /><code>scripts/system-setup/codex-config.toml.template</code>
+新規（hooks/MCP/settings 雛形 + 危険 4 カテゴリ PreToolUse block
+配線済）</label></li>
+<li><label><input
+type="checkbox" /><code>scripts/system-setup/codex-hook-wrapper.sh</code>
+新規（実行権限 0755、Codex hooks 入力 JSON 形式から Claude Code 用 hook
+bash 本体に橋渡し、<code>approval-gate</code>
+ハンドラ実装）</label></li>
+<li><label><input type="checkbox" /><strong>危険 4 カテゴリ PreToolUse
+block 動作確認</strong>: 実機 codex 起動 → お金 / 外部 API 契約 /
+ユーザーデータ削除 / 本番構成変更 のいずれかに該当する操作を試行 → block
+されることを確認 → 結果を完了条件ログに記録</label></li>
+<li><label><input
+type="checkbox" /><code>scripts/system-setup/decchan-launcher.sh</code>
+新規（実行権限 0755、<code>bash -n</code> syntax OK）</label></li>
+<li><label><input type="checkbox" /><code>scripts/codex-review</code>
+新規（実行権限 0755）</label></li>
+<li><label><input type="checkbox" /><code>scripts/codex-cto</code>
+新規（実行権限 0755、launcher の薄ラッパー）</label></li>
+<li><label><input
+type="checkbox" /><code>scripts/hooks/claude-agents-drift-warn.sh</code>
+新規 + 実行権限 + <code>bash -n</code> OK</label></li>
+<li><label><input
+type="checkbox" /><code>scripts/hooks/claude-agents-drift-pairs.yaml</code>
+新規</label></li>
+<li><label><input type="checkbox" /><code>.claude/settings.json</code>
+の PreToolUse Bash matcher に drift hook 登録</label></li>
+<li><label><input
+type="checkbox" /><code>docs/systems/decchan-takeover-checklist.md</code>
+→ <code>cto-rotation-checklist.md</code> <code>git mv</code> +
+中身全面置換</label></li>
+<li><label><input
+type="checkbox" /><code>docs/systems/decchan-takeover-checklist-brief.md</code>
+→ <code>cto-rotation-checklist-brief.md</code> <code>git mv</code> +
+中身全面置換</label></li>
+<li><label><input type="checkbox" /><code>docs/systems/magi.md</code>
+L292 等の旧名 cross-ref を新名に書き換え</label></li>
+<li><label><input
+type="checkbox" /><code>docs/systems/magi-brief.md</code> の旧名
+cross-ref を新名に書き換え</label></li>
+<li><label><input
+type="checkbox" /><code>docs/systems/CHANGELOG.md</code> に
+<code>## cto-rotation-checklist.md</code> セクション + entry
+追加</label></li>
+<li><label><input
+type="checkbox" /><code>docs/systems/code-security.md §6</code> hook
+一覧表に drift hook 1 行追加</label></li>
+<li><label><input
+type="checkbox" /><code>docs/systems/code-security-brief.md</code> §6
+bullet に hook 本数 + 名前列挙の同期</label></li>
+<li><label><input
+type="checkbox" /><code>.claude/rules/approval.md</code> に「入れ替わり
+CTO の判断権限範囲」節追記</label></li>
+<li><label><input type="checkbox" /><code>CLAUDE.md</code>（AiMiraiLabs
+配下 + ホーム）の索引に新名 cross-ref 反映（必要なら）</label></li>
+</ul>
+<h3 id="112-機械チェック">11.2 機械チェック</h3>
+<table>
+<thead>
+<tr>
+<th>チェック</th>
+<th>コマンド</th>
+<th>期待</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>全 shell script の syntax</td>
+<td><code>bash -n scripts/system-setup/decchan-launcher.sh scripts/codex-review scripts/codex-cto scripts/hooks/claude-agents-drift-warn.sh</code></td>
+<td>全て exit 0</td>
+</tr>
+<tr>
+<td>旧名残存ゼロ</td>
+<td><code>grep -rn 'decchan-takeover-checklist' AiMiraiLabs/CLAUDE.md docs/systems/ .claude/rules/ AGENTS.md</code></td>
+<td>（履歴 plan doc を除いて）ヒットなし</td>
+</tr>
+<tr>
+<td>AGENTS.md 中の検算文言が roles/review.md に移植済</td>
+<td><code>grep -F 'PERFECT' roles/review.md &amp;&amp; grep -F 'PERFECT' AGENTS.md</code></td>
+<td>前者ヒット、後者ヒットなし（または「3 モード」節の参照のみ）</td>
+</tr>
+<tr>
+<td>spec-brief-pairs.yaml 整合</td>
+<td>hook 自動チェック（push 時）</td>
+<td>spec-brief-sync-block.sh が新ペアを通す</td>
+</tr>
+<tr>
+<td>changelog-sync 整合</td>
+<td>hook 自動チェック（push 時）</td>
+<td><code>cto-rotation-checklist.md</code> の entry が CHANGELOG.md
+に存在</td>
+</tr>
+</tbody>
+</table>
+<h3 id="113-end-to-end-テスト本-pr-範囲外">11.3 end-to-end テスト（本 PR
+範囲外）</h3>
+<p>実機切替テスト（<code>!decchan</code> → tmux 入れ替え → ロール認識 →
+<code>!codechan</code> → 復帰 → HANDOFF_DECCHAN.md 確認）は bridge 側 PR
+と合流後。本 PR の merge 後、別 Issue として bridge 側 Phase 1
+実装を起票し、合流時に end-to-end 通す。</p>
+<hr />
+<h2 id="12-ロールバック手順--ハマりポイント">12. ロールバック手順 /
+ハマりポイント</h2>
+<h3 id="121-ロールバック">12.1 ロールバック</h3>
+<p>本 PR の commit
+は全て<strong>追加・改題のみで破壊的変更ナシ</strong>（旧名は git mv
+で履歴保持）。万一 merge 後に問題発生したら:</p>
+<ol type="1">
+<li><code>git revert &lt;merge-commit&gt;</code> で 1 コミット戻し</li>
+<li><code>decchan-takeover-checklist.md</code>
+旧名で参照していた箇所が壊れていないか grep 確認</li>
+<li>drift hook が誤発火していたら <code>.claude/settings.json</code>
+の登録行のみ削除（hook bash 本体は残置可）</li>
+</ol>
+<h3 id="122-ハマりポイント">12.2 ハマりポイント</h3>
+<ol type="1">
+<li><p><strong>bridge 側未対応のまま本 PR merge
+すると検算が壊れる懸念</strong></p>
+<ul>
+<li>AGENTS.md から検算文言を削除 → Codex が <code>roles/review.md</code>
+を Read してくれるかは Codex の文脈解釈次第</li>
+<li>安全策: AGENTS.md の「3 モード」節に「検算モード時は必ず
+<code>roles/review.md</code> を Read しろ」を太字で明記（§2.4）</li>
+<li>bridge 側 prompt 更新は本 PR merge 直後にすぐ着手（別 PR、bridge
+リポ）</li>
+</ul></li>
+<li><p><strong><code>~/.codex/config.toml</code>
+実適用とのズレ</strong></p>
+<ul>
+<li>雛形は本 PR で管理対象、実適用は手動 → ズレが必ず発生する</li>
+<li>緩和策: <code>cto-rotation-checklist.md</code> 内に「適用手順 +
+差分確認手順」を明記、Phase 1.5 で <code>codex-config-diff.sh</code>
+を作る（別 Issue）</li>
+</ul></li>
+<li><p><strong>drift hook が誤発火</strong></p>
+<ul>
+<li>claude 側を 1 文字だけ修正したのに agents 側が無関係でも warn が出る
+→ 「意図的に片側のみは無視可（warn-only）」を hook 出力に明記</li>
+<li>過剰検知が積もると CTO が hook を無視するクセが付くリスク → Phase 2
+で発火条件の絞り込み再検討</li>
+</ul></li>
+<li><p><strong><code>git mv</code> 後の brief-sync hook</strong></p>
+<ul>
+<li>旧名 → 新名の <code>git mv</code> だけだと
+<code>spec-brief-sync-block.sh</code> が「新名 spec ↔︎ 新名
+brief」のペアで判定する → 両方 git mv されていれば通る、片方だけ rename
+ミスると block</li>
+<li>対策: §11.2 の grep チェックで事前確認</li>
+</ul></li>
+<li><p><strong><code>approval-gate.sh</code> が本 PR
+実装中に誤発火する可能性</strong></p>
+<ul>
+<li>本 PR は headless 実行ではなく対話 CTO セッション →
+<code>MAGI_APPROVAL_GATE=1</code> 未設定 →
+影響ゼロ（既存設計通り、<code>approval.md</code> 機械強制節）</li>
+<li>念のため worker 起動時は <code>Agent isolation: "worktree"</code>
+で隔離（delegation.md <code>Worker Spawn Protocol</code>）</li>
+</ul></li>
+</ol>
+<hr />
+<h2 id="13-spec-sweep-6-項目セルフチェックpush-前ルーチン">13. spec
+sweep 6 項目セルフチェック（push 前ルーチン）</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>項目</th>
+<th>本 PR 対応</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>brief 同期（hook 機械強制）</td>
+<td><code>cto-rotation-checklist.md</code> +
+<code>cto-rotation-checklist-brief.md</code> 両方同 PR で追加 → hook
+pass</td>
+</tr>
+<tr>
+<td>2</td>
+<td>CHANGELOG.md sweep（hook warn-only）</td>
+<td><code>## cto-rotation-checklist.md</code> セクション + entry
+追記</td>
+</tr>
+<tr>
+<td>3</td>
+<td>cross-ref renumber</td>
+<td>節番号変更ナシ、ただし旧名 → 新名 link 全 grep + 置換（§9.4）</td>
+</tr>
+<tr>
+<td>4</td>
+<td>数字 claim drift</td>
+<td>active list / hook 一覧の hook 本数 表記を更新（§8.6、§9.5）</td>
+</tr>
+<tr>
+<td>5</td>
+<td>索引・active list drift</td>
+<td><code>CLAUDE.md</code>（ホーム + AiMiraiLabs）の索引に新名 cross-ref
+反映、<strong><code>tasks/todo.md</code> は本 Plan
+で触らない</strong>（並列セッション衝突防止）→
+並列メインセッション側で別途追記運用</td>
+</tr>
+<tr>
+<td>6</td>
+<td>関連 hook 一覧表記</td>
+<td><code>code-security.md §6</code> 表 +
+<code>code-security-brief.md</code> §6 bullet に drift hook 追加</td>
+</tr>
+</tbody>
+</table>
+<h3 id="131-push-前ルーチン">13.1 push 前ルーチン</h3>
+<p><code>workflow.md §push 前ルーチン</code> に従い:</p>
+<ol type="1">
+<li><strong>セルフレビュー sweep 6 項目</strong>:
+<ol type="1">
+<li>PR body claim ↔︎ diff 整合（記載した変更が全て diff にあるか）</li>
+<li>Test plan grep 全項目 verify（手元で実行して 1 hit 確認）</li>
+<li>行数指定があれば <code>wc -l</code> で実測一致</li>
+<li>cross-file 整合（旧名残存ゼロを再確認）</li>
+<li>scope 内かどうか（PR 本文 Scope 外宣言と diff 一致 ── bridge
+側変更は別 PR、本 PR では touch しない）</li>
+<li>ベリちゃん代打検算で MINOR 出たら merge 前に PERFECT 化</li>
+</ol></li>
+<li><strong><code>/simplify</code> 実行</strong>: <strong>docs only PR
+とは言いがたい</strong>（shell script 4 本 + hook bash 1 本 + YAML 2
+本）→ <strong>実施必須</strong></li>
+<li><strong><code>/autofix-pr</code></strong>: push
+後実行（既存ルール）</li>
+</ol>
+<hr />
+<h2 id="14-出典参照">14. 出典・参照</h2>
+<h3 id="141-親-plan--関連-pr">14.1 親 Plan / 関連 PR</h3>
+<ul>
+<li>親 Plan: <code>docs/plans/2026-05-13-cto-rotation.md</code>（PR #600
+merge 済）</li>
+<li>本 Plan が更新する旧 spec:
+<code>docs/systems/decchan-takeover-checklist.md</code>（2026-05-04
+初版、134 行）</li>
+</ul>
+<h3 id="142-行動ルール">14.2 行動ルール</h3>
+<ul>
+<li><code>.claude/rules/workflow.md</code>（push 前ルーチン / spec sweep
+6 項目 / 数字 claim quantitative claim）</li>
+<li><code>.claude/rules/delegation.md</code>（Worker Spawn Protocol /
+自動代打体制）</li>
+<li><code>.claude/rules/approval.md</code>（承認境界 3 段階 / Auto mode
+hard_deny）</li>
+<li><code>.claude/rules/security.md</code>（secrets P0 / worker env
+allowlist）</li>
+<li><code>.claude/rules/session-flow.md</code>（3 レベル分類）</li>
+</ul>
+<h3 id="143-既存仕様書参照">14.3 既存仕様書（参照）</h3>
+<ul>
+<li><code>docs/systems/magi.md</code>（MAGI 構成、L292 で旧名参照）</li>
+<li><code>docs/systems/magi-brief.md</code></li>
+<li><code>docs/systems/code-security.md §6</code>（hook 一覧表）</li>
+<li><code>docs/systems/code-security-brief.md §6</code></li>
+<li><code>docs/systems/CHANGELOG.md</code>（改訂履歴 canonical、L5 の同
+commit 追記ルール）</li>
+</ul>
+<h3 id="144-雛形-hook参考実装">14.4 雛形 hook（参考実装）</h3>
+<ul>
+<li><code>scripts/hooks/spec-brief-sync-block.sh</code>（YAML parse +
+git push 検出 + block）</li>
+<li><code>scripts/hooks/changelog-sync-warn.sh</code>（warn-only +
+fail-open、本 Plan §8 の hook 雛形）</li>
+<li><code>scripts/hooks/spec-brief-pairs.yaml</code>（YAML 設定例）</li>
+</ul>
+<h3 id="145-phase-1-範囲外別-pr--別-issue-起票">14.5 Phase 1 範囲外（別
+PR / 別 Issue 起票）</h3>
+<ul>
+<li>bridge <code>telegram_bot.py</code> の codechan 前提箇所抽象化</li>
+<li><code>magi-routing.json</code> スキーマ拡張（<code>previous</code> /
+<code>mode</code> / <code>lock</code> フィールド + atomic write）</li>
+<li>watchdog routing-aware 化</li>
+<li>監査ログ jsonl 書き出し（bridge bot 側で append）</li>
+<li><code>HANDOFF_DECCHAN.md</code> 運用開始（テンプレ + skill）</li>
+<li><code>scripts/system-setup/codex-hook-wrapper.sh</code> の
+<strong>Phase 1 部分</strong>= <code>approval-gate</code>
+ハンドラのみ実装 + 動作確認（危険 4 カテゴリ block）。Phase 1.5 で残り
+13 本 hook を順次 wrap</li>
+<li>Phase 1 非ブロッキング spike（Discord MCP /
+<code>codex app-server</code> usage / <code>ccusage</code> 精度）</li>
+</ul>
+<footer class="doc__footer">
+  <span class="doc__footer-mark">AiMirai Labs</span>
+
+</footer>
+</article>
+</div>
+<script>
+  // 目次（<details>）: ワイド画面では既定で開いてサイドバー表示、狭い画面（スマホ）では
+  // 折りたたんだ「目次 ▸」のまま（タップで展開）。JS 無効でも狭い画面はこの挙動になる。
+  (function () {
+    var t = document.querySelector("details.toc");
+    if (t && window.matchMedia("(min-width: 60rem)").matches) t.open = true;
+  })();
+</script>
+<script>
+  // Mermaid: pandoc gfm が出力する ```mermaid フェンスをビューアのブラウザ内で SVG レンダ。
+  // mermaid 本体（shares リポの assets/mermaid.min.js、UMD 単一ファイル vendor）は
+  // mermaid フェンスがあるページでのみ遅延ロード（無いページでは何も読み込まない＝HTML も軽量）。
+  // s/<hash>.html から見て ../assets/mermaid.min.js。サーバに Chromium は不要。
+  (function () {
+    var nodes = document.querySelectorAll(
+      "pre.mermaid > code, pre > code.language-mermaid, pre > code.mermaid"
+    );
+    if (!nodes.length) return;
+    nodes.forEach(function (code) {
+      var pre = code.closest("pre");
+      pre.className = "mermaid";
+      pre.textContent = code.textContent;
+    });
+    var s = document.createElement("script");
+    s.src = "../assets/mermaid.min.js";
+    s.onload = function () {
+      try {
+        window.mermaid.initialize({ startOnLoad: false, theme: "neutral", securityLevel: "strict" });
+        window.mermaid.run({ querySelector: "pre.mermaid" });
+      } catch (e) { markFailed(); }
+    };
+    s.onerror = markFailed;
+    document.body.appendChild(s);
+    function markFailed() {
+      document.querySelectorAll("pre.mermaid").forEach(function (pre) {
+        pre.classList.add("mermaid--failed");
+        pre.setAttribute("title", "Mermaid 読み込み失敗（オフラインで開いた可能性）");
+      });
+    }
+  })();
+</script>
+</body>
+</html>
